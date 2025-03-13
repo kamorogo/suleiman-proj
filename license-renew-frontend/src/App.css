@@ -1,0 +1,34 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  font-size: 16px;
+  flex-direction: column;
+  height: 100vh;
+}
+.header {
+  background-color: #0a51cc;
+  flex-shrink: 0;
+}
+.content {
+  display: flex;
+  padding: 20px;
+  background-color: #a1c3ff;
+  flex: 1;
+}
+.footer {
+  display: flex;
+  background-color: #0a51cc;
+  color: white;
+  flex-shrink: 0;
+}
+/* * {
+  grid-template-areas:
+  'header, header, header',
+  'content, content, content',
+  'footer, footer, footer'
+  ;
+} */

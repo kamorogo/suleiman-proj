@@ -1,0 +1,41 @@
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+
+header {
+    justify-content: space-between;
+    color: white;
+    display: flex;
+    align-items: center;
+    background-color: #0a51cc;
+    padding: 15px;
+    height: 40px;
+}
+
+
+.nav-link {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: 20px;
+}
+
+.nav-link li {
+    display: inline;
+}
+
+.nav-link a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+}
+
+.nav-link a:hover {
+    text-decoration-thickness: 10px;
+}
+
+.footer {
+    color: white;
+}
