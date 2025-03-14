@@ -19,7 +19,7 @@ class SoftwareSerializer(serializers.ModelSerializer):
 class NotifySerializer(serializers.ModelSerializer):
     class Meta:
         model = Notify
-        fields = '__all__'
+        fields = ['id', 'software', 'user_profile', 'type_notification', 'date_notification', 'sent_notification', 'subject', 'message', 'is_read', 'created_at']
 
   
 

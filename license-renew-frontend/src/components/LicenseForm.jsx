@@ -11,21 +11,21 @@ const LicenseForm = () => {
   }, []);
 
   const handleEdit = (license) => {
-    alert(`Editing license for ${license.holder}`);
+    alert(`Editing license for ${license.id}`);
   };
 
-  const handleDelete = async (license) => {
-    if (!window.confirm(`Are you sure you want to delete ${license.holder}'s license?`)) return;
+  const handleDelete = async (id) => {
+    if (!window.confirm(`Are you sure you want to delete your license?`)) return;
     try {
-      await axios.delete(`http://localhost:8000/delete-license/${license.id}/`);
-      setLicenses(licenses.filter(l => l.id !== license.id));
+      await axios.delete(`http://localhost:8000/license-delete/${id}/`);
+      setLicenses(licenses.filter(l => l.id !== id));
     } catch (error) {
       console.error("Error deleting license:", error);
     }
   };
 
   const handleRetrieve = (license) => {
-    alert(`Retrieving data for ${license.holder}`);
+    alert(`Retrieving data for ${license.id}`);
   };
 
   return (
@@ -45,7 +45,7 @@ const LicenseForm = () => {
             {licenses.map((license, index) => (
               <tr key={license.id} style={{ backgroundColor: "white", borderBottom: "1px solid black" }}>
                 <td style={styles.td}>{index + 1}</td>
-                <td style={{ ...styles.td, width: "400px" }}>{license.holder}</td>
+                <td style={{ ...styles.td, width: "400px" }}>{license.owner}</td>
                 <td style={styles.td}>
                   <span style={{
                     padding: "3px 8px",

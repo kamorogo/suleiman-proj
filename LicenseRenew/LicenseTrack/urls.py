@@ -4,9 +4,11 @@ from .import views
 # from .views import retrieve_license, add_license, update_license, edit_license, delete_license, LicenseReport
 
 from django.urls import path, include
+from django.contrib.auth.views import LoginView 
 from rest_framework.routers import DefaultRouter
 from .views import upload_software, list_software, get_software, delete_software, update_software, trigger_email, RenewSoftwareAPI
-from .views import SoftwareViewSet
+from .views import SoftwareViewSet, get_notifications, mark_notification_as_read
+
 
 router = DefaultRouter()
 router.register(r"software", SoftwareViewSet, basename="software")
@@ -17,6 +19,7 @@ urlpatterns = [
 ###########################################################################################################################################
 ###########################################################################################################################################
     path('software/', include(router.urls)),
+     path('login/', LoginView.as_view(), name='login'),
 
     ###---USECASE2---###
     path('upload-license/', upload_software, name='upload_license'),
@@ -29,8 +32,9 @@ urlpatterns = [
     path('licenseS/', SoftwareViewSet.as_view({'get': 'list_licenses'})), 
     path('software/generate_pdf/', SoftwareViewSet.as_view({'get': 'generate_pdf'}), name='generate_pdf'),
     path('software/generate_excel/', SoftwareViewSet.as_view({'get': 'generate_excel'}), name='generate_excel'),
- 
-
+    path('notifications/', get_notifications, name='notifications'),
+    path('notifications/<int:notification_id>/mark-read/', mark_notification_as_read, name='mark-notification-read'),
+    
 
 
 ###########################################################################################################################################

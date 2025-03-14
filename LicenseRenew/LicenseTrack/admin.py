@@ -13,10 +13,12 @@ from .models import Software, User_Profile, Notify, Renew
 
 @admin.register(Software)
 class SoftwareAdmin(admin.ModelAdmin):
-    list_display = ('type_license', 'issuing_authority', 'expiry_date', 'created_at')
-    search_fields = ('issuing_authority', 'type_license')
-    list_filter = ('type_license', 'expiry_date')
-    ordering = ('-expiry_date',)
+    list_display = ('name', 'type_license', 'owner', 'kra_pin', 'issuing_authority', 'expiry_date', 'renew_status', 'amount', 'created_at')
+    list_filter = ('type_license', 'renew_status', 'expiry_date', 'created_at')
+    search_fields = ('name', 'owner', 'kra_pin', 'issuing_authority')
+    ordering = ('-created_at',)
+    date_hierarchy = 'expiry_date'
+    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(User_Profile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -25,17 +27,18 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Notify)
 class NotifyAdmin(admin.ModelAdmin):
-    list_display = ('software', 'user_profile', 'type_notification', 'date_notification', 'is_read')
-    list_filter = ('type_notification', 'is_read')
-    search_fields = ('software__issuing_authority', 'user_profile__user__username')
-    ordering = ('-date_notification',)
+    list_display = ('software', 'user_profile', 'type_notification', 'date_notification', 'sent_notification', 'subject', 'is_read', 'created_at')
+    list_filter = ('type_notification', 'is_read', 'date_notification', 'created_at')
+    search_fields = ('software__name', 'user_profile__user__username', 'subject', 'message')
+    ordering = ('-created_at',)
+    list_editable = ('is_read',)
 
 @admin.register(Renew)
 class RenewAdmin(admin.ModelAdmin):
-    list_display = ('software', 'renew_date', 'renew_status', 'renew_fee')
-    list_filter = ('renew_status', 'renew_date')
-    search_fields = ('software__issuing_authority',)
-    ordering = ('-renew_date',)
+    list_display = ('software', 'renew_date', 'renew_fee')  
+    search_fields = ('software__name',) 
+    list_filter = ('renew_date',)  
+    ordering = ('-renew_date',) 
 
 
 

@@ -1,38 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchNotifications, markNotificationAsRead } from "../api";
 
-const Notifications = ({ data }) => {
- 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Due Soon":
-        return "#FFA500"; 
-      case "Expired":
-        return "#FF0000"; 
-      case "Active":
-        return "#008000"; 
-      default:
-        return "#000000"; 
-    }
+const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    fetchNotifications().then(setNotifications);
+  }, []);
+
+  const handleMarkRead = (id) => {
+    markNotificationAsRead(id).then(() => {
+      setNotifications(notifications.filter((n) => n.id !== id));
+    });
   };
 
   return (
-    <div style={{ ...styles.notification, borderColor: getStatusColor(data.renew_status) }}>
-      <h3 style={{ color: getStatusColor(data.renewal_status) }}>{data.issuing_authority}</h3>
-      <p>Expiry Date: {data.expiry_date}</p>
-      <p>Reminder: {data.reminderDays} days before expiry</p>
-      <p style={{ fontWeight: "bold" }}>Status: {data.renew_status}</p>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Notifications</h1>
+      <ul>
+        {notifications.map((notification) => (
+          <li key={notification.id} className="p-2 bg-gray-100 my-2 rounded">
+            {notification.message}
+            <button
+              onClick={() => handleMarkRead(notification.id)}
+              className="ml-4 text-blue-500 underline"
+            >
+              Mark as Read
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
-};
-
-
-const styles = {
-  notification: {
-    border: "2px solid",
-    borderRadius: "8px",
-    padding: "15px",
-    margin: "10px 0",
-  },
 };
 
 export default Notifications;

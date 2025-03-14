@@ -23,15 +23,21 @@ class Software(models.Model):
         ('Perpetual', 'Perpetual')
     ]
     type_license = models.CharField(max_length=100, choices=TYPE_LICENSE)
+    name =  models.CharField(max_length=255)
+    owner = models.CharField(max_length=255)
+    kra_pin = models.CharField(max_length=11, unique=True)
     issuing_authority = models.CharField(max_length=255)
     expiry_date = models.DateField(default=default_expiry_date)
+    issue_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
     reminder_days = models.JSONField(default=default_reminder_days)
+    renew_status = models.CharField(max_length=20, choices=[('expired', 'Expired'), ('active', 'Active'), ('renewed', 'Renewed')])
     document = models.FileField(upload_to="software/")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.type_license} - {self.issuing_authority} (Expires: {self.expiry_date})"
+        return f"{self.onwer} - {self.kra_pin} - {self.name} (Expires: {self.expiry_date})"
 
 
 class User_Profile(models.Model):
@@ -49,18 +55,19 @@ class Notify(models.Model):
     type_notification = models.CharField(max_length=100, choices=[('Expiry', 'Expiry'), ('Renewal Reminder', 'Renewal Reminder')])
     date_notification = models.DateField(auto_now_add=True)
     sent_notification = models.CharField(max_length=255)
+    subject = models.CharField(max_length=255)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.date_notification} - {self.sent_notification}"
+        return f"{self.user_profile.user.username} - {self.type_notification}"
     
 class Renew(models.Model):
     software = models.ForeignKey(Software, on_delete=models.CASCADE, related_name='renew')
     renew_date = models.DateField()
-    renew_status = models.CharField(max_length=20, choices=[('expired', 'Expired'), ('active', 'Active'), ('renewed', 'Renewed')])
     renew_fee = models.DecimalField(max_digits=10, decimal_places=2)
+    
 
     def __str__(self):
         return f"{self.renew_date} - {self.renew_status}"

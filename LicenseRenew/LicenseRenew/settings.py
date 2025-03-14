@@ -40,6 +40,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
  ] 
 
 
@@ -78,7 +79,7 @@ WSGI_APPLICATION = 'LicenseRenew.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'license_tracking',
+        'NAME': 'tracking_db',
         'USER': 'AdminS',
         'PASSWORD': '2025',
         'HOST': '127.0.0.1',
@@ -129,19 +130,19 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-###REST FRAMEWORK DECLARATION
-# REST_FRAMEWORK = {
-#     # your settings here, e.g.,
-#     'DEFAULT_RENDERER_CLASSES': (
-#         'rest_framework.renderers.JSONRenderer',
-#     ),
-#     'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.IsAuthenticated',
-#     ),
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'rest_framework.simplejwt.authentication.JWTAuthentication',
-#     )
-# }
+##REST FRAMEWORK DECLARATION
+REST_FRAMEWORK = {
+    # your settings here, e.g.,
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    )
+}
 
 # SIMPLE_JWT = {
 #     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
@@ -158,7 +159,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 ##CELERY SETUP
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 # Define celery backend cache
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = 'redis://@localhost:6379/0'
 CELERY_ACCEPT_CONTENT = 'json'
 # CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'

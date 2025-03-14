@@ -2,6 +2,7 @@ from celery import shared_task
 from django.utils.timezone import now
 from django.utils import timezone
 from django.core.mail import send_mail
+import traceback
 # from .models import License
 
 from channels.layers import get_channel_layer
@@ -38,37 +39,43 @@ def check_expiry_license():
      
 @shared_task
 def send_software_reminder():
-    today = now().date()
-    license_obj = Software.objects.all()
 
-    for days in [30, 15, 7]:
-        reminder_date = today + timedelta(days=days)
-        expiring_licenses = Software.objects.filter(expiry_date=reminder_date)
+    try:
+        today = now().date()
+        license_obj = Software.objects.all()
+
+        for days in [30, 15, 7]:
+            reminder_date = today + timedelta(days=days)
+            expiring_licenses = Software.objects.filter(expiry_date=reminder_date)
 
 
-        
-        for license_obj in expiring_licenses:
-            if license_obj.User_Profile and license_obj.User_Profile.email:
-                subject = f"Reminder: Your {license_obj.type_license} Expires Soon"
-                message = f"""
-                Dear Customer,
+            
+            for license_obj in expiring_licenses:
+                if license_obj.User_Profile and license_obj.User_Profile.email:
+                    subject = f"Reminder: Your {license_obj.type_license} Expires Soon"
+                    message = f"""
+                    Dear Customer,
 
-                Your software license for {license_obj.issuing_authority} is set to expire on {license_obj.expiry_date}.
-                Please renew it to avoid stress and other delays.
+                    Your software license for {license_obj.issuing_authority} is set to expire on {license_obj.expiry_date}.
+                    Please renew it to avoid stress and other delays.
 
-                Thank you,
-                ABC Bank Group
-                """
+                    Thank you,
+                    ABC Bank Group
+                    """
 
-                send_mail(
-                    subject,
-                    message,
-                    from_email="alisuleimann4@gmail.com",
-                    recipient_list=[license_obj.User_Profile.email],
-                    fail_silently=False
-                )
+                    send_mail(
+                        subject,
+                        message,
+                        from_email="alisuleimann4@gmail.com",
+                        recipient_list=[license_obj.User_Profile.email],
+                        fail_silently=False
+                    )
 
-    return "Notification Emails Sent!"
+        return "Notification Emails Sent!"
+    
+    except Exception as e:
+
+        traceback.print_exec()
 
 
 

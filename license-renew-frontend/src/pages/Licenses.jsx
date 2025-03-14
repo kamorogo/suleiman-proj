@@ -3,7 +3,7 @@ import LicenseForm from "../components/LicenseForm";
 import axios from "axios";
 
 const Licenses = () => {
-  const [licenses, setLicenses] = useState([]);
+  const [license, setLicenses] = useState([]);
 
   useEffect(() => {
     fetchLicenses();
