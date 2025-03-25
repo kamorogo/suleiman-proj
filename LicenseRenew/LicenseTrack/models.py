@@ -1,7 +1,7 @@
 from django.db import models
 from datetime import date, timedelta
-from django.utils import timezone
-from django.contrib.auth.models import User
+from django.utils.timezone import now
+from dateutil.relativedelta import relativedelta
 
 
 ###########################################################################################################################################
@@ -10,67 +10,57 @@ from django.contrib.auth.models import User
 
 
             ####----USECASE2----####
-
-def default_expiry_date():
-    return date.today() + timedelta(days=365)
-
-def default_reminder_days():
-    return {"30": True, "15": True, "7": True}
-
-class Software(models.Model):
-    TYPE_LICENSE = [
-        ('Subscription', 'Subscription'),
-        ('Perpetual', 'Perpetual')
-    ]
-    type_license = models.CharField(max_length=100, choices=TYPE_LICENSE)
-    name =  models.CharField(max_length=255)
-    owner = models.CharField(max_length=255)
-    kra_pin = models.CharField(max_length=11, unique=True)
-    issuing_authority = models.CharField(max_length=255)
-    expiry_date = models.DateField(default=default_expiry_date)
-    issue_date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    reminder_days = models.JSONField(default=default_reminder_days)
-    renew_status = models.CharField(max_length=20, choices=[('expired', 'Expired'), ('active', 'Active'), ('renewed', 'Renewed')])
-    document = models.FileField(upload_to="software/")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.onwer} - {self.kra_pin} - {self.name} (Expires: {self.expiry_date})"
-
-
-class User_Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+class Users(models.Model):
+    name =  models.CharField(max_length=255, null=False, blank=False)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
     email = models.EmailField(unique=True)
 
     def __str__(self):
-        return f"{self.user.username} Profile"
+        return self.name
     
-
-class Notify(models.Model):
-    software = models.ForeignKey(Software, on_delete=models.CASCADE, related_name='notify')
-    user_profile = models.ForeignKey(User_Profile, on_delete=models.CASCADE, related_name='notify')
-    type_notification = models.CharField(max_length=100, choices=[('Expiry', 'Expiry'), ('Renewal Reminder', 'Renewal Reminder')])
-    date_notification = models.DateField(auto_now_add=True)
-    sent_notification = models.CharField(max_length=255)
-    subject = models.CharField(max_length=255)
-    message = models.TextField()
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+class LicenseType(models.Model):
+    TYPE_LICENSE = [
+        ('Enterprise', 'enterprise'),
+        ('Proprietary', 'proprietary')
+    ]
+    type_license =  models.CharField(max_length=255, choices=TYPE_LICENSE)
+    description = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.user_profile.user.username} - {self.type_notification}"
+        return self.type_license
     
-class Renew(models.Model):
-    software = models.ForeignKey(Software, on_delete=models.CASCADE, related_name='renew')
-    renew_date = models.DateField()
-    renew_fee = models.DecimalField(max_digits=10, decimal_places=2)
-    
+class Licenses(models.Model):
+    provider = models.CharField(max_length=255)
+    duration = models.PositiveBigIntegerField(editable=False)
+    document = models.FileField(upload_to="software/")
+    licensetype = models.ForeignKey(LicenseType, on_delete=models.CASCADE, related_name='licenses')
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='licenses', null=True, blank=True)
 
     def __str__(self):
-        return f"{self.renew_date} - {self.renew_status}"
+        return f"{self.provider} - {self.licensetype.name} (Duration: {self.duration} months)"
+
+
+class Renewals(models.Model):
+    licenses = models.ForeignKey(Licenses, on_delete=models.CASCADE, related_name='renewals')
+    renewal_date = models.DateField(default=now)
+    expiry_date = models.DateField(editable=False)
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    invoice_no = models.CharField(max_length=10, unique=True)
+    receipt = models.FileField(upload_to='receipt/')
+
+    def save(self, *args, **kwargs):
+        
+        if not self.renewal_date:
+            self.renewal_date = now().date()
+        
+        license_duration = self.licenses.duration
+
+        self.expiry_date = self.renewal_date + relativedelta(months=license_duration)
+
+        super().save(*args, **kwargs) 
+
+    def __str__(self):
+        return f"{self.licenses} (Renewed on: {self.renewal_date} & Expires: {self.expiry_date} )"
 
 
 

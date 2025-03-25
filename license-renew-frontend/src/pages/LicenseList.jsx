@@ -33,7 +33,7 @@ const LicenseList = () => {
               <tr key={index}   style={{
                 backgroundColor: index % 2 === 0 ? 'white' : 'lightgray',}}>
                 <td style={styles.td}>{index + 1}</td>
-                <td style={styles.td}>{license.holder}</td>
+                <td style={styles.td}>{license.owner}</td>
                 <td style={styles.td}>{license.issuing_authority}</td>
                 <td style={styles.td}>{license.expiry_date}</td>
                 <td style={styles.td}>{license.type_license}</td>

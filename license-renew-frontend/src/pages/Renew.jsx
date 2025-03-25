@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
 const Renew = () => {
     const [licenses, setLicenses] = useState([]);
-    const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-    const [selectedLicense, setSelectedLicense] = useState(null);
 
     useEffect(() => {
         fetch("http://localhost:8000/licenseS/")
@@ -12,99 +9,133 @@ const Renew = () => {
             .then((data) => setLicenses(data));
     }, []);
 
-    const handlePay = (license) => {
-        setSelectedLicense(license);
-        setPaymentDialogOpen(true);
-    };
-
-    const handlePaymentOption = (option) => {
-        alert(`Proceeding with ${option} payment for license ID ${selectedLicense.id}`);
-        setPaymentDialogOpen(false);
-    };
-
     return (
-        <Box sx={{ p: 3 }}>
-            {licenses.map((license) => (
-                <Box key={license.id} sx={{ mb: 4, p: 2, border: "1px solid gray", borderRadius: 5 }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #ddd" }}>
-                        <thead>
-                            <tr>
-                                <th style={headerColumnStyle}><strong>Type</strong></th>
-                                <th style={headerColumnStyle}><strong>Issuing Authority</strong></th>
-                                <th style={headerColumnStyle}><strong>Expiry Date</strong></th>
-                                <th style={headerColumnStyle}><strong>Status</strong></th>
-                                <th style={lastHeaderColumnStyle}><strong>Actions</strong></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style={columnStyle}>{license.license_type}</td>
-                                <td style={columnStyle}>{license.issuing_authority}</td>
-                                <td style={columnStyle}>{new Date(license.expiry_date).toLocaleDateString()}</td>
-                                <td style={columnStyle}>
-                                    <span style={{
-                                        padding: "4px 8px",
-                                        borderRadius: "5px",
-                                        color: "white",
-                                        backgroundColor: license.renew_status === "Completed" ? "green" : "red"
-                                    }}>
-                                        {license.renew_status}
-                                    </span>
-                                </td>
-                                <td style={lastColumnStyle}>
-                                    {new Date(license.expiry_date) < new Date() ? (
-                                        <Button variant="contained" color="secondary" onClick={() => handlePay(license)}>
-                                            Pay
-                                        </Button>
-                                    ) : (
-                                        <Button variant="contained" color="primary" disabled>
-                                            Renew (Active)
-                                        </Button>
-                                    )}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </Box>
-            ))}
-
-            <Dialog open={paymentDialogOpen} onClose={() => setPaymentDialogOpen(false)}>
-                <DialogTitle>Select Payment Method</DialogTitle>
-                <DialogContent>
-                    <Button onClick={() => handlePaymentOption("Paypal")} sx={{ m: 1 }} variant="contained">PayPal</Button>
-                    <Button onClick={() => handlePaymentOption("Mpesa")} sx={{ m: 1 }} variant="contained">M-Pesa</Button>
-                    <Button onClick={() => handlePaymentOption("Airtel Money")} sx={{ m: 1 }} variant="contained">Airtel Money</Button>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setPaymentDialogOpen(false)}>Cancel</Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+        (
+            <>
+                <style>{`
+                    .main {
+                        width: 90%;
+                        margin: auto;
+                        padding: 20px;
+                        border-radius: 10px;
+                        background-color: #f9f9f9;
+                        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0);
+                    }
+    
+                    .header {
+                        text-align: start;
+                        margin-bottom: 20px;
+                    }
+    
+                    .header h1 {
+                        color: #333;
+                        font-weight: normal;
+                        font-size: 30px;
+                    }
+    
+                    .applicationf {
+                        padding: 20px;
+                    }
+    
+                    .applicationf h3 {
+                        margin-bottom: 15px;
+                        font-weight: normal;
+                        color: #444;
+                        font-size: 18px;
+                    }
+    
+                    label {
+                        display: block;
+                        margin: 10px 0 5px;
+                        color: #555;
+                    }
+    
+                    span {
+                        color: red;
+                    }
+    
+                    .fcontrol {
+                        width: 100%;
+                        padding: 8px;
+                        margin-bottom: 10px;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                        font-size: 16px;
+                    }
+    
+                    .c-file-input {
+                        width: 20%;
+                        padding: 5px;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                        background: #fff;
+                    }
+    
+                    .terms {
+                        display: flex;
+                        align-items: center;
+                        margin-top: 10px;
+                    }
+    
+                    .terms input {
+                        margin-right: 10px;
+                    }
+    
+                    .btn-R {
+                        width: 10%;
+                        padding: 12px;
+                        font-size: 18px;
+                        color: #fff;
+                        background-color: #28a745;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 15px;
+                    }
+    
+                    .btn-R:hover {
+                        background-color: #218838;
+                    }
+                `}</style>
+    
+                <div className="main">
+                    <div className="header">
+                        <h1>Renewal Application Form</h1>
+                    </div>
+                    <div className="applicationf">
+                        <h3>Your Details</h3>
+                        <form>
+                            <label >Full Name: <span>*</span></label>
+                            <input type="text" id="fullName" className="fcontrol" />
+    
+                            <label >Email: <span>*</span></label>
+                            <input type="email" id="email" className="fcontrol" />
+    
+                            <label >Phone: <span>*</span></label>
+                            <input type="telephone" id="phone" className="fcontrol" />
+    
+                            <h3>Required Documents</h3>
+    
+                            <label >Receipt: <span>*</span></label>
+                            <input type="file" id="receipt" className="c-file-input" />
+    
+                            <label >Re-upload Older License: <span>*</span></label>
+                            <input type="file" id="olderLicense" className="c-file-input" />
+    
+                            <div className="terms">
+                                <input type="checkbox" id="terms" name="terms_and_condition" />
+                                <label >I agree to the terms and conditions</label>
+                            </div> 
+    
+                            <button type="submit" id="submit-id-submit" className="btn-R btn-success">
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </>
+        )
     );
-};
-
-const headerColumnStyle = {
-    borderRight: "1px solid #ddd",
-    borderBottom: "2px solid #000",
-    padding: "8px",
-    textAlign: "left",
-    backgroundColor: "#f2f2f2",
-};
-
-const lastHeaderColumnStyle = {
-    ...headerColumnStyle,
-    borderRight: "none",
-};
-
-const columnStyle = {
-    borderRight: "1px solid #ddd",
-    padding: "8px",
-    textAlign: "left",
-};
-
-const lastColumnStyle = {
-    padding: "8px",
-    textAlign: "left",
 };
 
 export default Renew;

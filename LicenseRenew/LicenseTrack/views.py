@@ -23,8 +23,8 @@ from django.core.files.storage import default_storage
 from rest_framework.decorators import api_view, APIView, permission_classes
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from .serializers import SoftwareSerializer, NotifySerializer
-from .models import Software, Notify
+from .serializers import LicensesSerializer
+from .models import Licenses, LicenseType, Users
 from .tasks import send_software_reminder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -39,6 +39,7 @@ import matplotlib.pyplot as plt
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from rest_framework.permissions import AllowAny
+import uuid
 
 
 # LicenseSerializer, NotificationSerializer
@@ -75,51 +76,50 @@ def extract_text_from_pdf(pdf_path):
         print(f"Error extracting text from PDF: {e}")
         return ""
 
-# Function to detect license type
-def detect_type_license(text):
-    license_keywords = {
-        "Subscription": ["UNPAID", "VAT Number", "Proforma Invoice", "Invoiced To"],
-        "Perpetual": ["life time", "permanent"]
-    }
+# def detect_type_license(text):
+#     license_keywords = {
+#         "Subscription": ["UNPAID", "VAT Number", "Proforma Invoice", "Invoiced To"],
+#         "Perpetual": ["life time", "permanent"]
+#     }
     
+#     text = text.strip()
+#     for type_license, keywords in license_keywords.items():
+#         for keyword in keywords:
+#             if keyword.lower() in text.lower():
+#                 return type_license
+#     print("No matching keywords found in extracted text:", text[:200]) 
+#     return None
+
+def detect_licensetype(text):
+    license_keywords = {
+        "Proprietary": ["Proprietary", "Proprietary"],
+        "Enterprise": ["Enterprise", "enterprise"]
+    }
     text = text.strip()
     for type_license, keywords in license_keywords.items():
         for keyword in keywords:
             if keyword.lower() in text.lower():
                 return type_license
-    print("No matching keywords found in extracted text:", text[:200]) 
     return None
 
-def detect_software_name(text):
-    license_keywords = {
-        "Proprietary License": ["Proprietary", "Proprietary"],
-        "Enterprise License": ["Enterprise", "enterprise"]
-    }
-    text = text.strip()
-    for name, keywords in license_keywords.items():
-        for keyword in keywords:
-            if keyword.lower() in text.lower():
-                return name
-    return None
+# def detect_kra_pin(text):
+#     pattern = r"\b[A-Z]\d{9}[A-Z]\b"
+#     match = re.search(pattern, text)
+#     if match:
+#         return match.group(0)
+#     return "Unknown"
 
-def detect_kra_pin(text):
-    pattern = r"\b[A-Z]\d{9}[A-Z]\b"
-    match = re.search(pattern, text)
-    if match:
-        return match.group(0)
-    return "Unknown"
+# def detect_owner(text):
+#     match = re.search(r'Invoiced To\s*(.*?)\s*Client' , text)
+#     if match:
+#         return match.group(1).strip()
+#     return 'Unknown'
 
-def detect_owner(text):
-    match = re.search(r'Invoiced To\s*(.*?)\s*Client' , text)
-    if match:
-        return match.group(1).strip()
-    return 'Unknown'
-
-def detect_amount(text):
-    match = re.search(r'Total\s*Ksh\.(\d{1,3}(?:,\d{3})*(?:\.\d+)?)', text)
-    if match:
-        return match.group(1).replace(",", "")
-    return '0.00'
+# def detect_amount(text):
+#     match = re.search(r'Total\s*Ksh\.(\d{1,3}(?:,\d{3})*(?:\.\d+)?)', text)
+#     if match:
+#         return match.group(1).replace(",", "")
+#     return '0.00'
 
 def detect_issue_date(text):
     date_range_pattern = r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})"
@@ -139,7 +139,6 @@ def detect_issue_date(text):
     return None
 
 def detect_issuing_authority(text):
-    """Detect the issuing authority from known vendors."""
     known_vendors = ["Safaricom Limited", "Microsoft", "Oracle", "Adobe", "IBM"]
     for vendor in known_vendors:
         if vendor.lower() in text.lower():
@@ -186,8 +185,20 @@ def detect_expiry_date(text):
 
 @api_view(['POST'])
 def upload_software(request):
+    # if request.user.is_authenticated:
+    #     user = Users.objects.get(user=request.user)
+    
+
+    # if request.method == 'POST':
+    #     name = request.POST.get('name') 
+        
+        # if not name:
+        #     return HttpResponse("Name is required", status=400)
+
+
     try:
         print("Received request to upload software license")
+    
         
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
@@ -200,7 +211,8 @@ def upload_software(request):
         full_path = default_storage.path(file_path)
         print("Saved file at:", full_path)
 
-       
+        # Check if user with name exists, if so pick the corresponding email. If not create user with generic unique email
+
         text = extract_text_from_pdf(full_path)
         print("Extracted text:", text[:500])
         
@@ -209,96 +221,85 @@ def upload_software(request):
             return Response({"error": "No text extracted from file"}, status=400)
 
         # Detect license type
-        type_license = detect_type_license(text)
+        type_license = detect_licensetype(text)
         if not type_license:
             type_license = request.data.get("type_license")
             print("Detected:" ,type_license)
-        
-        name = detect_software_name(text)
-        if not name:
-            name = request.data.get("name")
-            print("Detected:" ,name)
-        
-        kra_pin = detect_kra_pin(text)
-        if kra_pin == "Unknown":
-            kra_pin = request.data.get("kra_pin")
-            print("KRA/PIN:" ,kra_pin)
 
-        owner = detect_owner(text)
-        if not owner:
-            owner = request.data.get("owner")
-            print("Detected:" ,owner)
 
-        amount = detect_amount(text)
-        if not amount:
-            amount = request.data.get("amount")
-            print("Detected:" ,amount)
+        valid_choices = [choice[0] for choice in LicenseType.TYPE_LICENSE]
+        if type_license not in valid_choices:
+            return Response({"error": "Invalid license type"}, status=400)
+
+
+        license_type_obj, _ = LicenseType.objects.get_or_create(type_license=type_license)
+
+
+
+        # user_name, _ = Users.objects.get_or_create(
+        #         name=name,
+        #         email=str(uuid.uuid4()) + "@gmail.com"
+        #     )
+
+
+        # name = detect_licensetype(text)
+        # if not name:
+        #     name = request.data.get("name")  # Fallback to request data
+        #     if not name:
+        #         return Response({"error": "License type name is required."}, status=400)
+        
+        # print("Detected License Type:", name)
+        # license_type_obj, _ = LicenseType.objects.get_or_create(name=name)
+
+        # kra_pin = detect_kra_pin(text)
+        # if kra_pin == "Unknown":
+        #     kra_pin = request.data.get("kra_pin")
+        #     print("KRA/PIN:" ,kra_pin)
+
+        # owner = detect_owner(text)
+        # if not owner:
+        #     owner = request.data.get("owner")
+        #     print("Detected:" ,owner)
+
+        # amount = detect_amount(text)
+        # if not amount:
+        #     amount = request.data.get("amount")
+        #     print("Detected:" ,amount)
 
         # Detect issuing authority
-        issuing_authority = detect_issuing_authority(text)
-        if issuing_authority == "Unknown":
-            issuing_authority = request.data.get("issuing_authority")
-            print("Vendor:" ,issuing_authority)
+        provider = detect_issuing_authority(text)
+        if provider == "Unknown":
+            provider = request.data.get("provider")
+            print("Vendor:" ,provider)
 
 
         issue_date = detect_issue_date(text)
-        print("Issue date detected before saving:", issue_date)
-
-        if not issue_date:
-            issue_date = request.data.get("issue_date")
-
-        print("Final issue_date before saving:", issue_date, type(issue_date))
-
-        
-        if issue_date:
-            issue_date = issue_date[0] 
-        else:
-            return None 
-
-
-        # Detect expiry date
         expiry_date = detect_expiry_date(text)
-        print("Expiry date detected before saving:", expiry_date)
-
-        if not expiry_date:
-            expiry_date = request.data.get("expiry_date")
-
-        print("Final expiry_date before saving:", expiry_date, type(expiry_date))
-
         
-        if expiry_date:
-            expiry_date = expiry_date[1] 
-        else:
-            expiry_date = "0001-01-01" 
+        if not issue_date or not expiry_date:
+            return Response({"error": "Missing issue_date or expiry_date from the extracted text."}, status=400)
 
+        issue_date = issue_date[0] if isinstance(issue_date, tuple) else issue_date
+        expiry_date = expiry_date[1] if isinstance(expiry_date, tuple) else expiry_date
 
        
-        print(f"type_license: {type_license}")
-        print(f"name: {name}")
-        print(f"kra_pin: {kra_pin}")
-        print(f"owner: {owner}")
-        print(f"amount: {amount}")
-        print(f"issuing_authority: {issuing_authority}")
-        print(f"issue_date: {issue_date}")
-        print(f"expiry_date: {expiry_date}")
+        try:
+            issue_date_obj = datetime.strptime(issue_date, "%Y-%m-%d")
+            expiry_date_obj = datetime.strptime(expiry_date, "%Y-%m-%d")
+            duration = round((expiry_date_obj - issue_date_obj).days / 30)
+        except ValueError as e:
+            print(f"Error in date conversion: {e}")
+            return Response({"error": "Invalid date format."}, status=400)
 
-
-
-
-        if not type_license or not name or not kra_pin or not owner or not amount or not issuing_authority or not issue_date or not expiry_date:
-            return Response({"error": "Missing license details. Please provide manually."}, status=400)
-
-        # Save data into SoftwareLicense table
-        Software.objects.create(
-            name=name,
-            type_license=type_license,
-            owner=owner,
-            kra_pin=kra_pin,
-            issuing_authority=issuing_authority,
-            amount=amount,
-            issue_date=issue_date,
-            expiry_date=expiry_date,
+        if duration <= 0:
+            return Response({'detail': 'Expiry date must be after issue date.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        license = Licenses.objects.create(
+            licensetype=license_type_obj,
+            provider=provider,
+            duration=duration,
             document=uploaded_file,
+            # users=user,
         )
 
         # Cleanup
@@ -316,25 +317,25 @@ def upload_software(request):
 @api_view(['GET'])
 def list_software(request):
  
-    licenses = Software.objects.all()
-    serializer = SoftwareSerializer(licenses, many=True)
+    licenses = Licenses.objects.all()
+    serializer = LicensesSerializer(licenses, many=True)
     return Response(serializer.data)
 
 
 @api_view(['GET'])
-def get_software(request, pk):
+def get_software(request, id):
     try:
-        license_obj = Software.objects.get(pk=pk)
-        serializer = SoftwareSerializer(license_obj)
+        license_obj = Licenses.objects.get(id=id)
+        serializer = LicensesSerializer(license_obj)
         return Response(serializer.data)
-    except Software.DoesNotExist:
+    except Licenses.DoesNotExist:
         return Response({"error": "Software License not found"}, status=404)
 
 
 @api_view(['PUT', 'PATCH'])
-def update_software(request, pk):
-    license_obj = get_object_or_404(Software, pk=pk)
-    serializer = SoftwareSerializer(license_obj, data=request.data, partial=True)
+def update_software(request, id):
+    license_obj = get_object_or_404(Licenses, id=id)
+    serializer = LicensesSerializer(license_obj, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
@@ -342,32 +343,41 @@ def update_software(request, pk):
 
 
 @api_view(['DELETE'])
-def delete_software(request, pk):
+def delete_software(request, id):
     try:
-        license_obj = Software.objects.get(pk=pk)
+        license_obj = Licenses.objects.get(id=id)
         license_obj.delete()
         return Response({"message": "License deleted successfully"}, status=204)
-    except Software.DoesNotExist:
+    except Licenses.DoesNotExist:
         return Response({"error": "License not found"}, status=404)
 
 
 @api_view(['POST'])
 def trigger_email(request):
+    email = request.data.get("email")
+
+    if not email:
+        return Response({"message": "Email needed"}, status=400)
+
     try:
      send_software_reminder.delay()
+
+     return Response({"message": "Email Notification triggered!"}, status=200)
+
     except Exception as e:
         print("Error occured: ", str(e))
 
-    return Response({"massage": "Email Notification triggered!"}, status=200)
+        return Response({"error": str(e)}, status=500)
 
-            # --- SOFTWARE --- #
-class SoftwareViewSet(viewsets.ModelViewSet):
-    queryset = Software.objects.all().prefetch_related('renew')
-    serializer_class = SoftwareSerializer
+    
+            # --- LICENSE SOFTWARE --- #
+class LicensesViewSet(viewsets.ModelViewSet):
+    queryset = Licenses.objects.all().prefetch_related('renew')
+    serializer_class = LicensesSerializer
 
     @action(detail=False, methods=["get"])
     def due_soon(self, request):
-        upcoming_licenses = Software.objects.filter(expiry_date__lte=now().date())
+        upcoming_licenses = Licenses.objects.filter(expiry_date__lte=now().date())
         serializer = self.get_serializer(upcoming_licenses, many=True)
         return Response(serializer.data)
     
@@ -376,13 +386,13 @@ class SoftwareViewSet(viewsets.ModelViewSet):
         pdf = canvas.Canvas(buffer, pagesize=letter)
         pdf.drawString(100, 750, "Software License Report")
         
-        licenses = Software.objects.all()
+        licenses = Licenses.objects.all()
         y = 720
         for license in licenses:
-            # Ensure you're converting model attributes to strings
-            issuing_authority = str(license.issuing_authority)  # Convert to string
-            license_type = str(license.type_license)  # Convert to string
-            expiry_date = str(license.expiry_date)  # Convert to string
+            
+            issuing_authority = str(license.provider)  
+            license_type = str(license.licensetype.name) 
+            expiry_date = str(license.duration)  
             pdf.drawString(100, y, f"{issuing_authority} {license_type} - Exp: {expiry_date}")
             y -= 20
 
@@ -394,12 +404,12 @@ class SoftwareViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def generate_excel(self, request):
-        licenses = Software.objects.all()
+        licenses = Licenses.objects.all()
         data = [
             {
                 "Name": l,
-                "Issuing Authority": l.issuing_authority,
-                "Type": l.type_license,
+                "Issuing Authority": l.provider,
+                "Type": l.licensetype.name,
                 "Expiry Date": l.expiry_date,
                 "Status": "Active" if l.expiry_date >= datetime.today().date() else "Expired"
             }
@@ -415,36 +425,11 @@ class SoftwareViewSet(viewsets.ModelViewSet):
         return HttpResponse(buffer, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
-            # --- NOTIFICATION --- #
-# class NotifyViewSet(viewsets.ModelViewSet):
-#     queryset = Notify.objects.all()
-#     serializer_class = NotifySerializer
-
-@api_view(['GET'])
-@permission_classes([AllowAny])  # This will make the endpoint accessible without authentication
-def get_notifications(request):
-    notifications = Notify.objects.all()  # No user profile filter
-    serializer = NotifySerializer(notifications, many=True)
-    return Response(serializer.data)
-
-
-@api_view(['POST'])
-def mark_notification_as_read(request, notification_id):
-    try:
-        notification = Notify.objects.get(id=notification_id, user=request.user)
-        notification.is_read = True
-        notification.save()
-        return Response({"message": "Notification marked as read"})
-    except Notify.DoesNotExist:
-        return Response({"error": "Notification not found"}, status=404)
-
-
-
         # --- RENEW --- #
 class RenewSoftwareAPI(APIView):
-    def put(self, request, pk, *args, **kwargs):
+    def put(self, request, id, *args, **kwargs):
         try:
-            license_obj = Software.objects.get(pk=pk)
+            license_obj = Licenses.objects.get(id=id)
             current_expiry_date = license_obj.expiry_date
 
            
@@ -459,7 +444,7 @@ class RenewSoftwareAPI(APIView):
 
             return Response({"message": f"License renewed until {new_expiry_date}"}, status=status.HTTP_200_OK)
 
-        except Software.DoesNotExist:
+        except Licenses.DoesNotExist:
             return Response({"error": "Software License not found"}, status=status.HTTP_404_NOT_FOUND)
 
 

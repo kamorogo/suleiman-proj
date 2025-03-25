@@ -8,7 +8,7 @@ import traceback
 from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
-from .models import Software, Notify
+from .models import Licenses
 
 
 
@@ -18,45 +18,27 @@ from .models import Software, Notify
 
 
                 ######---USECASE2---#####
-@shared_task
-def check_expiry_license():
-    upcoming_licenses = Software.objects.filter(expiry_date__lte=now().date())
-
-    for software in upcoming_licenses:
-        notification = Notify.objects.create(
-            software=software,
-            message=f"Your license '{software.type_license}' is expiring soon!"
-        )
-        
-        channel_layer = get_channel_layer()
-        channel_layer.group_send(
-            "notifications",
-            {
-                "type": "send_notification",  
-                "message": notification.message
-            }
-        )
      
 @shared_task
 def send_software_reminder():
 
     try:
         today = now().date()
-        license_obj = Software.objects.all()
+        license_obj = Licenses.objects.all()
 
         for days in [30, 15, 7]:
             reminder_date = today + timedelta(days=days)
-            expiring_licenses = Software.objects.filter(expiry_date=reminder_date)
+            expiring_licenses = Licenses.objects.filter(expiry_date=reminder_date)
 
 
             
             for license_obj in expiring_licenses:
-                if license_obj.User_Profile and license_obj.User_Profile.email:
-                    subject = f"Reminder: Your {license_obj.type_license} Expires Soon"
+                if license_obj.users and license_obj.users.email:
+                    subject = f"Reminder: Your {license_obj.licensetype.type_license} License Expires Soon"
                     message = f"""
                     Dear Customer,
 
-                    Your software license for {license_obj.issuing_authority} is set to expire on {license_obj.expiry_date}.
+                    Your software license for {license_obj.provider} is set to expire on {license_obj.expiry_date}.
                     Please renew it to avoid stress and other delays.
 
                     Thank you,
@@ -67,7 +49,7 @@ def send_software_reminder():
                         subject,
                         message,
                         from_email="alisuleimann4@gmail.com",
-                        recipient_list=[license_obj.User_Profile.email],
+                        recipient_list=[license_obj.users.email],
                         fail_silently=False
                     )
 

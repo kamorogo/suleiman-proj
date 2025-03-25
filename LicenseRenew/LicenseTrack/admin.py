@@ -1,5 +1,5 @@
-from django.contrib import admin
-from .models import Software, User_Profile, Notify, Renew
+from django.contrib import admin    
+from .models import Users, LicenseType, Licenses, Renewals
 # from .models import License, User, Renewal, Notification # imports all models defined in model.py in our app
 
 
@@ -10,35 +10,32 @@ from .models import Software, User_Profile, Notify, Renew
 
 
                 ###---USECASE2---###
+@admin.register(Users)
+class UsersAdmin(admin.ModelAdmin):
+    list_display = ('name', 'phone_number', 'email')
+    search_fields = ('name', 'email')
+    list_filter = ('phone_number',)
 
-@admin.register(Software)
-class SoftwareAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type_license', 'owner', 'kra_pin', 'issuing_authority', 'expiry_date', 'renew_status', 'amount', 'created_at')
-    list_filter = ('type_license', 'renew_status', 'expiry_date', 'created_at')
-    search_fields = ('name', 'owner', 'kra_pin', 'issuing_authority')
-    ordering = ('-created_at',)
-    date_hierarchy = 'expiry_date'
-    readonly_fields = ('created_at', 'updated_at')
+@admin.register(LicenseType)
+class LicenseTypeAdmin(admin.ModelAdmin):
+    list_display = ('type_license', 'description')
+    search_fields = ('type_license',)
+    list_filter = ('type_license',)
 
-@admin.register(User_Profile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone_number', 'email')
-    search_fields = ('user__username', 'email', 'phone_number')
+@admin.register(Licenses)
+class LicensesAdmin(admin.ModelAdmin):
+    list_display = ('provider', 'licensetype', 'users', 'duration', 'document')
+    search_fields = ('provider', 'licensetype__name', 'users__name')  
+    list_filter = ('licensetype', 'users')
 
-@admin.register(Notify)
-class NotifyAdmin(admin.ModelAdmin):
-    list_display = ('software', 'user_profile', 'type_notification', 'date_notification', 'sent_notification', 'subject', 'is_read', 'created_at')
-    list_filter = ('type_notification', 'is_read', 'date_notification', 'created_at')
-    search_fields = ('software__name', 'user_profile__user__username', 'subject', 'message')
-    ordering = ('-created_at',)
-    list_editable = ('is_read',)
+@admin.register(Renewals)
+class RenewalsAdmin(admin.ModelAdmin):
+    list_display = ('licenses', 'renewal_date', 'expiry_date', 'paid_amount', 'invoice_no')
+    search_fields = ('licenses__provider', 'invoice_no')
+    list_filter = ('renewal_date', 'licenses')
 
-@admin.register(Renew)
-class RenewAdmin(admin.ModelAdmin):
-    list_display = ('software', 'renew_date', 'renew_fee')  
-    search_fields = ('software__name',) 
-    list_filter = ('renew_date',)  
-    ordering = ('-renew_date',) 
+
+
 
 
 

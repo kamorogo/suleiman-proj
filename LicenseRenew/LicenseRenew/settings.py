@@ -17,6 +17,8 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'users.apps.UsersConfig',
+    'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,7 +81,7 @@ WSGI_APPLICATION = 'LicenseRenew.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'tracking_db',
+        'NAME': 'license_DB',
         'USER': 'AdminS',
         'PASSWORD': '2025',
         'HOST': '127.0.0.1',
@@ -158,12 +160,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 ##CELERY SETUP
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-# Define celery backend cache
+
+
+
 CELERY_RESULT_BACKEND = 'redis://@localhost:6379/0'
-CELERY_ACCEPT_CONTENT = 'json'
-# CELERY_RESULTS_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULTS_BACKEND = ' '
 CELERY_TIMEZONE = 'UTC'
 
 

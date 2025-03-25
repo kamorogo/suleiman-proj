@@ -7,33 +7,31 @@ from django.urls import path, include
 from django.contrib.auth.views import LoginView 
 from rest_framework.routers import DefaultRouter
 from .views import upload_software, list_software, get_software, delete_software, update_software, trigger_email, RenewSoftwareAPI
-from .views import SoftwareViewSet, get_notifications, mark_notification_as_read
+from .views import LicensesViewSet, trigger_email
+
 
 
 router = DefaultRouter()
-router.register(r"software", SoftwareViewSet, basename="software")
+router.register(r"licenses", LicensesViewSet, basename="licenses")
 
 
 urlpatterns = [
 ###########################################################################################################################################
 ###########################################################################################################################################
 ###########################################################################################################################################
-    path('software/', include(router.urls)),
-     path('login/', LoginView.as_view(), name='login'),
-
+    path('licenses/', include(router.urls)),
+    
     ###---USECASE2---###
     path('upload-license/', upload_software, name='upload_license'),
     path('licenseS/', list_software, name='list_licenses'),  
-    path('licenseS/<int:pk>/', get_software, name='get_license'),
-    path('license-update/<int:pk>/', update_software, name='update_license'),
-    path('license-delete/<int:pk>/', delete_software, name='delete_license'),
+    path('licenseS/<int:id>/', get_software, name='get_license'),
+    path('license-update/<int:id>/', update_software, name='update_license'),
+    path('license-delete/<int:id>/', delete_software, name='delete_license'),
     path('trigger_mail/', trigger_email, name='trigger_license'),
-    path('licenses/renew/<int:pk>/', RenewSoftwareAPI.as_view(), name='renew_license'),
-    path('licenseS/', SoftwareViewSet.as_view({'get': 'list_licenses'})), 
-    path('software/generate_pdf/', SoftwareViewSet.as_view({'get': 'generate_pdf'}), name='generate_pdf'),
-    path('software/generate_excel/', SoftwareViewSet.as_view({'get': 'generate_excel'}), name='generate_excel'),
-    path('notifications/', get_notifications, name='notifications'),
-    path('notifications/<int:notification_id>/mark-read/', mark_notification_as_read, name='mark-notification-read'),
+    path('licenses/renew/<int:id>/', RenewSoftwareAPI.as_view(), name='renew_license'),
+    path('licenseS/', LicensesViewSet.as_view({'get': 'list_licenses'})), 
+    path('software/generate_pdf/', LicensesViewSet.as_view({'get': 'generate_pdf'}), name='generate_pdf'),
+    path('software/generate_excel/', LicensesViewSet.as_view({'get': 'generate_excel'}), name='generate_excel'),
     
 
 

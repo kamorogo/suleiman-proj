@@ -5,226 +5,248 @@ import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   return (
-    <div className='dashboard-section'>
-
-
-                    {/* ---SECTION 1 ---  */}
-            <div className='banner-card'>
-                    <img src='/SAMPLE10.jpg' className='IMG' alt='IMG' />
-                    <div className='banner-text'>
-                        <h>Digitika with<font color="orange"> ABC Bank Renew</font></h>
-                        <p>We're number one leading bank on all digital services we offer, and here comes the new service
-                            with us...<span className='abcrenew'><font color="orange"></font></span>
-                        </p>
-                    </div>
+    <div className='MainPage'>
+        {/* -SECTION 1- */}
+        <div className='page1'>
+            <div className='header'>
+                    <img src="logO1.png" className="logo" alt="logo" />
+                    <h11>ABC Bank</h11>
+                <nav>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="/contacts">Contact Us</a></li>
+                        <li><a href="#logout">Log Out</a></li>
+                        <li><a href="/services">Services</a></li>
+                        <a>
+                            <img class="trp-flag-image" src="https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Kenya.svg" width="18" height="12" alt="SW" /> KE
+                        </a>
+                    </ul>
+                </nav>
             </div>
-          
-            
-                    {/* // SECTION 2 ---- */}
-            <div className='details-1'>
-                <div className='details-1-top'>
-                    <div className='details-head'>
-                        <h9>HOW CAN WE HELP YOU</h9>
+            <div className='page1-main'>
+                <div className='pg1-container'>
+                    <div className='content'>
+                        <img src='/helpD.jpg' className="img" alt='img' />
+                    </div>
+                    <div className='words'>
+                        <h1>Your Trusted Partner in License Renewal!!
+                            <br/>
+                        </h1>
+                        <p1>As a leading digital banking provider, we are excited to introduce our latest service—  
+                        a seamless and efficient license renewal system designed just for you....</p1>
                     </div>
                 </div>
-                <div className='details-1-content'>
-                    <div className='details-card-img'>
-                        <img src='/SAMPLE2.jpg' alt='' /><img src='/SAMPLE3.jpg' class='IMG' />
+            </div>
+        </div>
+        {/* -SECTION 2- */}
+        <div className='page2'>
+            <div className='topper'>
+                <h21>Reasons for choosing ABC</h21>
+            </div>
+            <div className='pg2-container'>
+                <div class="feature">
+                    <i class="fa-solid fa-check"></i>
+                    <h2>User Friendly</h2>
+                </div>
+                <div class="feature">
+                <i class="fa-solid fa-check"></i>
+                    <h2>Secure & Flexible</h2>
+                </div>
+                <div class="feature">
+                    <i class="fa-solid fa-check"></i>
+                    <h2>Customer Support</h2>
+                </div>
+                <div class="feature">
+                    <i class="fa-solid fa-check"></i>
+                    <h2>Responsive Interface</h2>
+                </div>
+            </div>
+        </div>
+        {/* -SECTION 3- */}
+        <div className='page3'>
+            <div className='pg3-container'>
+                <div className='right'>
+                    <h3>Why ABC Bank</h3>
+                    <p2>
+                        <i>"ABC Bank is the ideal partner for your License Renewal Tracking needs that could offer several benefits"</i>
+                        <br/>This system was our idea since then on our customer who have been suffering
+                        on renewals. 
+                        As we've got our Software Development team staff who work productively day and night
+                        to ensure our customers get what best for them that will suit their need, finaly ABCRenew was birth.
+                        <br />
+                        We work toghether and share to our customers on what we've innovated to connect all through our digital services. 
+                    </p2>
+                    <br/><a href='/contacts' className='contact-btn'>CONTACT US</a>
+                </div>
+                <div className='pg3-Image'>
+                    <img src='/devteam.png' alt='' />
+                </div>
+            </div>
+        </div>
+        {/* -SECTION 4- */}
+        <div className='page4'>
+            <div className='pg4-container'>
+                <div className='pg4-col1'>
+                    <div className='pg4-dp'>
+                        <Link to="/reports" >
+                            <div className='above'>
+                                <img src='/reportB.png' alt='' />
+                                <h4>Reports</h4>
+                            </div>
+                        </Link>
+                        <p4>Generate reports here for auditing and compliance checks. This section allows you to download detailed reports for reviewing software usage, license validity and expiration dates. Stay informed about your license status with comprehensive insights.</p4>
                     </div>
-                    <div className='details-text'>
-                        <div> 
-                            <h9>What we offer to you our <font color="orange">customer</font></h9>
+                    <div className='pg4-dp'>
+                        <Link to="/viewlicense" >
+                            <div className='above'>
+                                <img src='/vieW.png' alt='' />
+                                <h4>View License</h4>
+                            </div>
+                        </Link>
+                        <p4>Check details of your licenses here. You can view all relevant information about each software license, including license key, renewal date and more. Easily track the status of your licenses to avoid any expirations or gaps in coverage.</p4>
+                    </div>
+                </div>
+                <div className='pg4-col2'>
+                    <img src='/phoney1.png' alt='' />
+                </div>
+                <div className='pg4-col3'>
+                    <div className='pg4-dp'>
+                            <Link to="/renew" >
+                                <div className='above'>
+                                    <img src='/renewB.png' alt='' />
+                                    <h4>Renewing</h4>
+                                </div>
+                            </Link>
+                            <p4>Renew licenses before expiration. This feature enables you to quickly renew expiring licenses and ensure that you continue to comply with your software agreements. Set reminders and manage renewals efficiently.</p4>
                         </div>
-                       
-                        <p10>
-                            It was our idea since then on our customer who have been suffering
-                            on renewals.<br /> 
-                            As we've got our Software Development team staff who work productively day and night
-                            to ensure our customers get what best for them that will suit their need, finaly ABCRenew was birth.
-                            <br />
-                            We work toghether and share to our customers on what we've innovated to connect all through our digital services. 
-                        </p10>
+                        <div className='pg4-dp'>
+                            <Link to="/licenses" >
+                                <div className='above'>
+                                    <img src='/manageB.png' alt='' />
+                                    <h4>Manage Licenses</h4>
+                                </div>
+                            </Link>
+                            <p4>Track all your licenses in one place. This section allows you to organize and manage all the licenses associated with your business. Keep track of important details like license type, status and renewal dates in a centralized dashboard.</p4>
+                        </div>
                     </div>
-                </div>
             </div>
-
-            
-
-    
-
-        {/* <header className='header'>
-            <img src='/logo.jpg' className='logo' alt='logo'/>
-            <nav>
-                <input type='text' placeholder='search..' />
-                <ul className='nav-link'>
-                    <li><Link to='/'>Home</Link></li>
-                    <li><Link to='/about'>About</Link></li>
-                    <li><Link to='/contacts'>Contacts</Link></li>
-                    <li><Link to='/services'>Services</Link></li>
-                </ul>
-            </nav>
-        </header> */}
-              
-
-
-                 {/* /----DASHBOARD ---- */}
-
-        <main className='dashboard-main'>
-            <div className='dashboard-title'>
-                <p>What can I do for you:</p>
-                <div className='title-search'>
-                    <input type='text' placeholder='search' />
-                </div>
-            </div>
-            <div className='dashboard-container'>
-                <div className='right-container'>
-                    <div className='dashboard-dp'>
-                        <Link to="/reports">
-                            <i class="fa fa-file" aria-hidden="true"></i>
-                            <p>Reports generation</p>
-                        </Link>
-                    </div>
-                    <div className='dashboard-dp'>
-                        <Link to="/viewlicense">
-                            <i class="fa fa-eye" aria-hidden="true"></i>
-                            <p>View licenses</p>
-                        </Link>
-                    </div>
-                    <div className='dashboard-dp'>
-                        <Link to="/notifications">
-                            <i class="fa fa-bell" aria-hidden="true"></i>
-                            <p>Notifications</p>
-                        </Link>
-                    </div>
-                </div>
-                <div className='left-container'>
-                <div className='dashboard-dp'>
-                        <Link to="/renew">
-                            <i class="fa fa-refresh" aria-hidden="true"></i>
-                            <p>Renew license</p>
-                        </Link>
-                    </div>
-                    <div className='dashboard-dp'>
-                        <Link to="/licenses">
-                            <i class="fa fa-tasks" aria-hidden="true"></i>
-                            <p>Manage licenses</p>
-                        </Link>
-                    </div>
-                    <div className='dashboard-dp'>
-                        <Link to="/help">
-                            <i class="fa fa-question-circle" aria-hidden="true"></i>
-                            <p>Help</p>
-                        </Link>
-                    </div>
-                </div>
-            </div>       
-        </main>
-
-
-
-                   {/* // SECTION 5 ---- */}
-
-        <div class="container-fluid text-center">
-            <h1 class="headinginfo">Why Choose ABC Bank</h1>
-            <p id="parainfo" style={{fontStyle: "italic"}}>
-                "ABC Bank is the ideal partner for your License Renewal Tracking needs that could offer several benefits"
-            </p>
         </div>
-        <div class="container-fluid" id="newcard">
-            <div class="card-grid">
-                <div class="card">
-                    <i class="fas fa-user-clock"></i>
-                    <h5 class="card-title">Customer Support</h5>
-                    <p class="card-text">
-                    ABC Bank's customer service could offer dedicated support to help resolve any issues with payments, processing or system integration.
+        {/* -SECTION 5- */}
+        <div className='page5'>
+            <div className='box'>
+                <h>Frequently Asked Questions</h>
+                <div className='pg5-container'>
+                    <details>
+                        <summary>How to Renew your License?</summary>
+                        <p>
+                           1. Go to the Safaricom Portal<br/>
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Open the Safaricom services.<br/>
+                           2. Sign in<br/>
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use your credentials to sign in<br/>
+                           3. Check your Software Subscriptions<br/>
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Navigate to "My Subscriptions" .<br/>
+                           4. Select the Software expired<br/>
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click on the software.<br/>
+                           5. Confirm & Pay<br/>
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The portal will display the fee.<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose M-Pesa, Card or Bank transfer as the payment method.<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If using M-Pesa, enter the Paybill number provided.<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pay and close.<br/>
+                           6. Receive Confirmation<br/>
+
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Once payment is successful, you will get an SMS confirming the payment.<br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Download or print the receipt.<br/>
+                           7. Upload the receipt to our website once done for renewal approve.
                     </p>
-                </div>
-                <div class="card">
-                    <i class="fa-solid fa-key"></i>
-                    <h5 class="card-title">Data Security</h5>
-                    <p class="card-text">
-                    ABC Bank's security infrastructure could ensure data protection through encryption, secure storage and compliance with regulations.
-                    </p>
-                </div>
-                <div class="card">
-                    <i class="fa fa-credit-card"></i>
-                    <h5 class="card-title">Reliable Payment Process</h5>
-                    <p class="card-text">
-                    ABC Bank could offer secure and seamless payment gateways, ensuring that payments for license renewals can be processed easily and efficiently.
-                    </p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-brain"></i>
-                    <h5 class="card-title">Expert Employees</h5>
-                    <p class="card-text">
-                    ABC Bank has experience dealing with corporate clients or industries that require license tracking, their expertise could provide added value.
-                    </p>
-                </div>
-                <div class="card">
-                    <i class="fas fa-coins"></i>
-                    <h5 class="card-title">Integrated Finacial Services</h5>
-                    <p class="card-text">
-                    ABC Bank could provide integrations with financial tools and reports, making the tracking and management of licenses and their renewals smoother for businesses.
-                    </p>
-                </div>
-                <div class="card">
-                    <i class="fa-solid fa-scale-balanced"></i>
-                    <h5 class="card-title">Scalable Solutions</h5>
-                    <p class="card-text">
-                    ABC Bank’s infrastructure could scale accordingly, ensuring that as your license renewal system handles more data, payments and reminders.
-                    </p>
+                    </details>
+                    <details>
+                        <summary>How can I upload my software license documents?</summary>
+                        <p>You can upload your software license documents by navigating to the 'Document Management' section of your dashboard and selecting the 'Upload' option.</p>
+                    </details>
+                    <details>
+                        <summary>What types of reminders does LicenseRenew provide?</summary>
+                        <p>LicenseRenew provides automated email reminders and in-app notifications for upcoming license renewals, with customizable schedules (e.g., 30, 15, or 7 days before expiry).</p>
+                    </details>
+                    <details>
+                        <summary>Can I generate reports in LicenseRenew?</summary>
+                        <p>Yes, LicenseRenew allows you to generate both PDF and Excel reports to track compliance and license statuses.</p>
+                    </details>
+                    <details>
+                        <summary>How do I update my contact information?</summary>
+                        <p >You can update your contact information by going to your profile page and editing the fields for your email and phone number.</p>
+                    </details>
                 </div>
             </div>
         </div>
-
-
-                {/* ----OUR CLIENTS---- */}
-
-        <div className='client-page'>
+        {/* -SECTION 6- */}
+        <div className='page6'>
             <div className='client-info'>
                 <div className='client-head'>
-                    <h9>Our <font color='orange'>Clients & Partners</font></h9>
+                    <h9> <font color='blue'>Our Clients & Partners</font></h9>
                 </div>
                 <div className='client-partners'>
                     <div className='partner-boxes'>
-                        <img src='/company.jpg' className='com' alt='com' />
+                        <img src='/firm.jpg' className='com' alt='com' />
                         <h1>Companies</h1>
+                        <hr/>
+                        <p6>We collaborate with leading firms to streamline their software license management and compliance processes.</p6>
                     </div>
                     <div className='partner-boxes'>
-                        <img src='/startups.jpg' className='start' alt='start' />
+                        <img src='/startUP.jpg' className='start' alt='start' />    
                         <h1>Startups</h1>
+                        <hr/>
+                        <p6>Startups trust us to help them scale by managing their software licenses efficiently and cost-effectively.</p6>
                     </div>
                     <div className='partner-boxes'>
-                        <img src='individuals.webp' className='ind' alt='ind' />
+                        <img src='person.jpg' className='ind' alt='ind' />
                         <h1>Individuals</h1>
+                        <hr/>
+                        <p6>Freelancers and individuals rely on us to keep track of their essential software tools and licenses.</p6>
                     </div>
                 </div>
                 <div className='client-image'>
-                    <img src='/coop.jpg' className='cooop' alt='coop'/>
-                    <img src='/Equity Bank Logo.png' className='equity' alt='equity'/>
-                    <img src='/GTCO_logo.png' className='gtco' alt='gtco'/>
-                    <img src='/NSAK.jpg' className='nsak' alt='nsak'/>
-                    <img src='/nai.png' className='nai' alt='nai'/>
+                    <img src='/safaricom.png' className='client-logo' alt='Safaricom' />
+                    <img src='/meta.png' className='client-logo' alt='Meta' />
+                    <img src='/Amazon.png' className='client-logo' alt='Amazon' />
+                    <img src='/Google.png' className='client-logo' alt='Google' />
+                    <img src='/Microsoft.png' className='client-logo' alt='Microsoft' />
+                    <img src='/Airtel.png' className='client-logo' alt='Airtel' />
+                    <img src='/Telkom.png' className='client-logo' alt='Telkom' />
                 </div>
             </div>
         </div>
 
-
-        <div class="contact-form">
-            <h2>Reach Out!</h2>
-            <form>
-                <input type="text" name="from_name" placeholder="Full Name" aria-label="Full Name" required />
-                <input type="email" name="email" placeholder="Email Address" aria-label="Email Address" required />
-                <input type="text" name="subject" placeholder="Subject" aria-label="Subject" required />
-                <textarea name="message" placeholder="Message" rows="4" aria-label="Message" required></textarea>
-                <button type="submit">Send Message</button>
-            </form>  
+        <div class="contact-container">
+            <div class="payment-info">
+                <h6>Payment Methods</h6>
+                <p62><strong>We accept various payment methods for your convenience:</strong>
+                    <br/>Need help on payments? Check out our FAQs on the payment processes.
+                </p62>
+                <div class="payment-logos">
+                    <img src="Paypal.png" alt="PayPal" />
+                    <img src="Visa.png" alt="Visa" />
+                    <img src="Mastercard.png" alt="MasterCard" />
+                    <img src="Mpesa.png" alt="M-Pesa" />
+                    <img src="Airtel.png" alt="Airtel" />
+                </div>
+                <p>For more details, feel free to contact us!</p>
+            </div>
+            <div class="contact-form">
+                <form>
+                    <input type="text" name="from_name" placeholder="Full Name" aria-label="Full Name" required />
+                    <input type="email" name="email" placeholder="Email Address" aria-label="Email Address" required />
+                    <input type="text" name="subject" placeholder="Subject" aria-label="Subject" required />
+                    <textarea name="message" placeholder="Message" rows="4" aria-label="Message" required></textarea>
+                    <button type="submit">Send Message</button>
+                </form>  
+            </div>
         </div>
-
-
-
-                {/* ---FOOTER--- */}
-
+        {/* -SECTION 7- */}
         <footer className='footer'>
             <div class="footer-custom">
                 <div class="footer-container">
@@ -278,9 +300,7 @@ const Dashboard = () => {
                 </div>
            </div>
         </footer>
-
-
-    </div>
+    </div>            
   )
 }
 

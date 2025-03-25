@@ -27,7 +27,7 @@ app.conf.beat_schedule = {
 app.conf.beat_schedule = {
     "send-reminders-daily": {
         "task": "LicenseTrack.tasks.send_software_reminder",
-        "schedule": crontab(hour=8, minute=0),
+        "schedule": crontab(hour=0, minute=0),
     },
 }
 

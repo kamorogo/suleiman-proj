@@ -1,7 +1,6 @@
 from django import forms
-from .models import License
-
-from .models import Software
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 
 
@@ -11,12 +10,7 @@ from .models import Software
 
 
                 ######---USECASE2---#####
-class SoftwareForm(forms.ModelForm):
-    class Meta:
-        model = Software
-        fields = ['file']
 
-    file = forms.FileField(required=True, label="Upload")
 
 
 
@@ -26,12 +20,12 @@ class SoftwareForm(forms.ModelForm):
 
 
                 ######---USECASE1---#####   
-class LicenseForm(forms.ModelForm):
-    class Meta:
-        model = License
-        fields = ['file']
+# class LicenseForm(forms.ModelForm):
+#     class Meta:
+#         model = License
+#         fields = ['file']
 
-    file = forms.FileField(required=True, label="Upload License Document")
+#     file = forms.FileField(required=True, label="Upload License Document")
    
     # def clean_documents(self):
     #     document = self.cleaned_data.get('documents')

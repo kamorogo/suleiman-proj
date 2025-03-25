@@ -1,7 +1,7 @@
 from rest_framework import serializers
 # from .models import License, Notification
 
-from .models import Software, Notify, Renew
+from .models import Licenses, Users, Renewals, LicenseType
 
 
 ###########################################################################################################################################
@@ -10,20 +10,17 @@ from .models import Software, Notify, Renew
 
 
                 ###---USECASE2---###
-class SoftwareSerializer(serializers.ModelSerializer):
+class LicensesSerializer(serializers.ModelSerializer):
+    licensetype = serializers.CharField(source='licensetype.type_license')
 
     class Meta:
-        model = Software
+        model = Licenses
         fields = '__all__'
 
-class NotifySerializer(serializers.ModelSerializer):
+class UserSSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Notify
-        fields = ['id', 'software', 'user_profile', 'type_notification', 'date_notification', 'sent_notification', 'subject', 'message', 'is_read', 'created_at']
-
-  
-
-
+        model = Users
+        fields = ['name', 'email', 'phone_number']
 
 
 
