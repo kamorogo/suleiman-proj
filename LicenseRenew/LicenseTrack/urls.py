@@ -7,7 +7,7 @@ from django.contrib.auth.views import LoginView
 from rest_framework.routers import DefaultRouter
 # from .views import upload_software, list_software, get_software, delete_software, update_software, , RenewSoftwareAPI
 # from .views import LicensesViewSet, trigger_email, license_add, EditLicense
-from .views import extract_text, create_license, trigger_email, list_software, get_software, delete_software, update_subscription, download_subscription
+from .views import extract_text, create_license, trigger_email, list_software, get_software, delete_software, LicenseUpdateView, download_subscription
 from .views import SubscriptionReportAPIView, SubscriptionDataAPIView, SubscriptionTypeReportAPIView, ProvidersListAPIView
 
 
@@ -27,9 +27,9 @@ urlpatterns = [
     path('licenseS/', list_software, name='list_licenses'),  
     path('licenseS/<int:id>/', get_software, name='get_license'),
     path('trigger_mail/', trigger_email, name='trigger_license'),
-    path('license-update/<int:id>/', update_subscription, name='update_license'),
+    path('license-update/<int:id>/', LicenseUpdateView.as_view(), name='update_license'),
     path('license-delete/<int:id>/', delete_software, name='delete_license'),
-    path('licenseS/<int:id>/download/', download_subscription, name="download_license"),
+    path('licenseS/download/<int:id>/', download_subscription, name="download_license"),
 
 
     path('reports/subscription/', SubscriptionReportAPIView.as_view(), name='subscription_reports'),

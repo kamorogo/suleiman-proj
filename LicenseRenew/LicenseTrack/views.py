@@ -33,7 +33,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 from django.utils.timezone import now
 import io
@@ -217,19 +216,20 @@ def download_subscription (request, id):
 
 
 # ----EDIT/UPDATE---- #
-@api_view(['PUT', 'PATCH'])
-def update_subscription(request, id):
-    try:
-        subscription_instance = Subscription.objects.get(id=id)
+class LicenseUpdateView(APIView):
 
-    except Subscription.DoesNotExist:
-        return Response({"detail": "Subscription not found"}, status=status.HTTP_404_NOT_FOUND)
-    
-    serializer = SubscriptionSerializer(subscription_instance, data=request.data, partial=True) 
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, id):
+        try:
+            license = Subscription.objects.get(id=id)
+        except Subscription.DoesNotExist:
+            return Response({'error': 'License not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SubscriptionSerializer(license, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # ----REPORTS---- #

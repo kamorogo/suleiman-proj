@@ -47,26 +47,54 @@ const LicenseList = () => {
           </tbody>
         </table>
       </div>
+      <style jsx>
+        {
+          `
+          @media screen and (max-width: 600px) {
+            th, td {
+              font-size: 0.6rem;
+              padding: 6px;
+            }
+
+            .viewButton {
+              font-size: 0.6rem;
+              width: 70px;
+            }
+          }
+          `
+        }
+      </style>
     </div>
   );
 };
 
 const styles = {
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    margin: '20px 0',
+  },
+  headerRow: {
+    backgroundColor: 'lightgray',
+    color: 'black',
+  },
   th: {
-    padding: '2px 8px',
+    padding: '8px',
     textAlign: 'left',
     borderBottom: '1px solid #ddd',
-    borderRight: '0.5px solid #ddd',
-    fontSize: '0.9rem',
+    fontSize: '1rem',
   },
   td: {
     borderRight: '1px solid #ddd',
-    padding: '2px 8px',
+    padding: '8px',
     borderBottom: '1px solid #ddd',
-    fontSize: '0.7rem',
+    fontSize: '0.9rem',
   },
-  tr: {
-    backgroundColor: '#fff'
+  oddRow: {
+    backgroundColor: '#f9f9f9',
+  },
+  evenRow: {
+    backgroundColor: '#fff',
   },
   viewButton: {
     backgroundColor: '#007bff',
@@ -74,10 +102,9 @@ const styles = {
     border: 'none',
     borderRadius: '3px',
     cursor: 'pointer',
-    borderRadius: '4px',
-    fontSize: '0.7rem',
+    fontSize: '0.8rem',
     width: '90px',
-  }
+  },
 };
 
 export default LicenseList;

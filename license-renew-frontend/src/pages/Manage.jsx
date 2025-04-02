@@ -6,10 +6,10 @@ const Manage = () => {
     const [licenses, setLicenses] = useState([]);
     const [filteredLicenses, setFilteredLicenses] = useState([]);
     const location = useLocation();
-    const { id } = useParams();
     const [licenseData, setLicenseData] = useState({});
     const [modalVisibility, setModalVisibility] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [id, setId] = useState("")
 
 
     const queryParams = new URLSearchParams(location.search);
@@ -40,9 +40,11 @@ const Manage = () => {
     const handleEdit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        console.error("My ID", id)
 
         try {
-            const response = await axios.put(`http://127.0.0.1:8000/license-update/${id}/`, licenseData);
+            const response = await axios.put(`http://127.0.0.1:8000/license-update/${id}/`, JSON.stringify(licenseData));
+           
             if (response.status === 200) {
                 alert("License updated successfully");
                 fetchLicenses();
@@ -60,6 +62,7 @@ const Manage = () => {
     const openEditModal = (license) => {
         setLicenseData(license);  
         setModalVisibility(true); 
+        setId(license.id);
     };
     const closeEditModal = () => {
         setModalVisibility(false);
@@ -79,9 +82,9 @@ const Manage = () => {
 
 
 // ----DOWNLOAD---- //
-    const handleDownload = async (Id) => {
+    const handleDownload = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8000/licenses/${Id}/download/`, {
+            const response = await fetch(`http://127.0.0.1:8000/licenseS/download/${id}/`, {
                 method: "GET",
             });
 
@@ -93,7 +96,7 @@ const Manage = () => {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = `license_${Id}.pdf`;
+            a.download = `license_${id}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -134,7 +137,7 @@ const Manage = () => {
                             <td>{license.providers}</td>
                             <td>{license.duration} months</td>
                             <td className="action-buttons">
-                                <button onClick={() => openEditModal(license.id)} className="edit-button">EDIT</button>
+                                <button onClick={() => openEditModal(license)} className="edit-button">EDIT</button>
                                 <button onClick={() => handleDelete(license.id)} className="delete-button">DELETE</button>
                                 <button onClick={() => handleDownload(license.id)} className="download-button">DOWNLOAD</button>
                             </td>
