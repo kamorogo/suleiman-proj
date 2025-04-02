@@ -17,7 +17,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'users.apps.UsersConfig',
+    # 'users.apps.UsersConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'LicenseRenew.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'license_DB',
+        'NAME': 'subscription_DB',
         'USER': 'AdminS',
         'PASSWORD': '2025',
         'HOST': '127.0.0.1',
@@ -156,7 +156,12 @@ REST_FRAMEWORK = {
 
 ##MEDIA ROOTS DEFINED
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = 'login'
+
 
 ##CELERY SETUP
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'

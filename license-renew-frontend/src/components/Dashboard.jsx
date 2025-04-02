@@ -8,7 +8,7 @@ const Dashboard = () => {
     <div className='MainPage'>
         {/* -SECTION 1- */}
         <div className='page1'>
-            <div className='header'>
+            <headeR className='headeR'>
                     <img src="logO1.png" className="logo" alt="logo" />
                     <h11>ABC Bank</h11>
                 <nav>
@@ -22,7 +22,7 @@ const Dashboard = () => {
                         </a>
                     </ul>
                 </nav>
-            </div>
+            </headeR>
             <div className='page1-main'>
                 <div className='pg1-container'>
                     <div className='content'>
@@ -120,7 +120,7 @@ const Dashboard = () => {
                             <p4>Renew licenses before expiration. This feature enables you to quickly renew expiring licenses and ensure that you continue to comply with your software agreements. Set reminders and manage renewals efficiently.</p4>
                         </div>
                         <div className='pg4-dp'>
-                            <Link to="/licenses" >
+                            <Link to="/providers" >
                                 <div className='above'>
                                     <img src='/manageB.png' alt='' />
                                     <h4>Manage Licenses</h4>
@@ -217,6 +217,7 @@ const Dashboard = () => {
                     <img src='/Microsoft.png' className='client-logo' alt='Microsoft' />
                     <img src='/Airtel.png' className='client-logo' alt='Airtel' />
                     <img src='/Telkom.png' className='client-logo' alt='Telkom' />
+                    <img src='/IBM_logo.png' className='client-logo' alt='IBM' />
                 </div>
             </div>
         </div>

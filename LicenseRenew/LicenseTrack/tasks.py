@@ -3,12 +3,10 @@ from django.utils.timezone import now
 from django.utils import timezone
 from django.core.mail import send_mail
 import traceback
-# from .models import License
-
 from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
-from .models import Licenses
+from .models import Subscription
 
 
 
@@ -24,11 +22,11 @@ def send_software_reminder():
 
     try:
         today = now().date()
-        license_obj = Licenses.objects.all()
+        license_obj = Subscription.objects.all()
 
         for days in [30, 15, 7]:
             reminder_date = today + timedelta(days=days)
-            expiring_licenses = Licenses.objects.filter(expiry_date=reminder_date)
+            expiring_licenses = Subscription.objects.filter(expiry_date=reminder_date)
 
 
             

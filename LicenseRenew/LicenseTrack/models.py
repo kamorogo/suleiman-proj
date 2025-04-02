@@ -18,30 +18,29 @@ class Users(models.Model):
     def __str__(self):
         return self.name
     
-class LicenseType(models.Model):
-    TYPE_LICENSE = [
-        ('Enterprise', 'enterprise'),
-        ('Proprietary', 'proprietary')
-    ]
-    type_license =  models.CharField(max_length=255, choices=TYPE_LICENSE)
-    description = models.CharField(max_length=255)
+class Providers(models.Model):
+    service_provider = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    description = models.TextField(max_length=510)
 
     def __str__(self):
-        return self.type_license
+        return self.service_provider
     
-class Licenses(models.Model):
-    provider = models.CharField(max_length=255)
-    duration = models.PositiveBigIntegerField(editable=False)
-    document = models.FileField(upload_to="software/")
-    licensetype = models.ForeignKey(LicenseType, on_delete=models.CASCADE, related_name='licenses')
-    users = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='licenses', null=True, blank=True)
-
+class Subscription(models.Model):
+    subscription_type = models.CharField(max_length=255)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    duration = models.IntegerField()
+    issue_date = models.DateField()
+    expiry_date = models.DateField()
+    document = models.FileField(upload_to="subscription/", blank=True, null=True)
+    providers = models.ForeignKey(Providers, on_delete=models.CASCADE, related_name='subscription')
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='subscription', null=True, blank=True)
+    
     def __str__(self):
-        return f"{self.provider} - {self.licensetype.name} (Duration: {self.duration} months)"
-
-
+        return f"{self.subscription_type} - {self.providers.service_provider}"
+   
 class Renewals(models.Model):
-    licenses = models.ForeignKey(Licenses, on_delete=models.CASCADE, related_name='renewals')
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, related_name='renewals')
     renewal_date = models.DateField(default=now)
     expiry_date = models.DateField(editable=False)
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -53,14 +52,14 @@ class Renewals(models.Model):
         if not self.renewal_date:
             self.renewal_date = now().date()
         
-        license_duration = self.licenses.duration
+        subscription_duration = self.subscription.duration
 
-        self.expiry_date = self.renewal_date + relativedelta(months=license_duration)
+        self.expiry_date = self.renewal_date + relativedelta(months=subscription_duration)
 
         super().save(*args, **kwargs) 
 
     def __str__(self):
-        return f"{self.licenses} (Renewed on: {self.renewal_date} & Expires: {self.expiry_date} )"
+        return f"{self.subscription} (Renewed on: {self.renewal_date} & Expires: {self.expiry_date} )"
 
 
 

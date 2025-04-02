@@ -12,24 +12,28 @@ from PIL import Image
 from fuzzywuzzy import fuzz
 from dateutil import parser
 from docx import Document
+from django.db.models import Count, Sum, Q
 from odf.opendocument import load 
 from odf.text import P
 from pdf2image import convert_from_path
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseNotFound, FileResponse
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from rest_framework.decorators import api_view, APIView, permission_classes
 from rest_framework.response import Response
 from rest_framework import status, viewsets
-from .serializers import LicensesSerializer
-from .models import Licenses, LicenseType, Users
+from rest_framework.parsers import MultiPartParser, FormParser
+from .serializers import SubscriptionSerializer
+from .models import Subscription, Providers, Users
 from .tasks import send_software_reminder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 from django.utils.timezone import now
 import io
@@ -42,316 +46,149 @@ from rest_framework.permissions import AllowAny
 import uuid
 
 
-# LicenseSerializer, NotificationSerializer
-# License
-# send_renewal_reminder
-
 ###########################################################################################################################################
 ###########################################################################################################################################
 ###########################################################################################################################################
 
+def extract_text_from_pdf(pdf_file):
+    """Extract text from a PDF file (OCR for images)."""
+    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
+    text = ""
 
-                             ###---USECASE2---###
-def extract_text_from_pdf(pdf_path):
-    """Extract text from a PDF file, with OCR for image-based PDFs."""
-    try:
-        doc = fitz.open(pdf_path)
-        text = ""
+    for page in doc:
+        page_text = page.get_text("text")
+        if page_text.strip():
+            text += page_text
+        else:
+            pix = page.get_pixmap()
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            text += pytesseract.image_to_string(img)
 
-        for page_num in range(doc.page_count):
-            page = doc.load_page(page_num)
-            page_text = page.get_text("text")
+    return text.strip()
 
-            if page_text.strip():
-                text += page_text
-            else:
-                print(f"No text found in page {page_num + 1}, attempting OCR...")
-                pix = page.get_pixmap()
-                img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                ocr_text = pytesseract.image_to_string(img, config="--psm 6")  
-                text += ocr_text
+def parse_license_details(text):
+    """Extract structured license details from the text."""
+    details = {}
 
-        return text.strip()
-    except Exception as e:
-        print(f"Error extracting text from PDF: {e}")
-        return ""
+    # Extract Subscription Type
+    subscription_types = ["Proprietary", "Enterprise"]
+    for sub in subscription_types:
+        if sub.lower() in text.lower():
+            details["subscription_type"] = sub
+            break
 
-# def detect_type_license(text):
-#     license_keywords = {
-#         "Subscription": ["UNPAID", "VAT Number", "Proforma Invoice", "Invoiced To"],
-#         "Perpetual": ["life time", "permanent"]
-#     }
-    
-#     text = text.strip()
-#     for type_license, keywords in license_keywords.items():
-#         for keyword in keywords:
-#             if keyword.lower() in text.lower():
-#                 return type_license
-#     print("No matching keywords found in extracted text:", text[:200]) 
-#     return None
+    # Extract Service Provider
+    providers = ["Microsoft", "Google", "Oracle", "Adobe"]
+    for provider in providers:
+        if provider.lower() in text.lower():
+            details["service_provider"] = provider
+            break
 
-def detect_licensetype(text):
-    license_keywords = {
-        "Proprietary": ["Proprietary", "Proprietary"],
-        "Enterprise": ["Enterprise", "enterprise"]
-    }
-    text = text.strip()
-    for type_license, keywords in license_keywords.items():
-        for keyword in keywords:
-            if keyword.lower() in text.lower():
-                return type_license
-    return None
+    # Extract Amount Paid (Currency format)
+    match = re.search(r"Total\s*Ksh\.(\d{1,3}(?:,\d{3})*(?:\.\d+)?)", text)
+    details["amount_paid"] = match.group(1).replace(",", "") if match else "0.00"
 
-# def detect_kra_pin(text):
-#     pattern = r"\b[A-Z]\d{9}[A-Z]\b"
-#     match = re.search(pattern, text)
-#     if match:
-#         return match.group(0)
-#     return "Unknown"
-
-# def detect_owner(text):
-#     match = re.search(r'Invoiced To\s*(.*?)\s*Client' , text)
-#     if match:
-#         return match.group(1).strip()
-#     return 'Unknown'
-
-# def detect_amount(text):
-#     match = re.search(r'Total\s*Ksh\.(\d{1,3}(?:,\d{3})*(?:\.\d+)?)', text)
-#     if match:
-#         return match.group(1).replace(",", "")
-#     return '0.00'
-
-def detect_issue_date(text):
-    date_range_pattern = r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})"
-
-    matches = re.findall(date_range_pattern, text, re.IGNORECASE)
-    if matches:
+    # Extract Date Range (Issue & Expiry Date)
+    date_match = re.search(r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})", text)
+    if date_match:
         try:
-            start_date = datetime.strptime(matches[0][0], "%d/%m/%Y").strftime("%Y-%m-%d")
-            end_date = datetime.strptime(matches[0][1], "%d/%m/%Y").strftime("%Y-%m-%d")
-            print(f"Extracted Date: {start_date} to {end_date}")
-            return start_date, end_date
-        except ValueError as e:
-            print(f"Date parsing error: {e}")
-            return None
+            issue_date = datetime.strptime(date_match.group(1), "%d/%m/%Y")
+            expiry_date = datetime.strptime(date_match.group(2), "%d/%m/%Y")
+            details["issue_date"] = issue_date.strftime("%Y-%m-%d")
+            details["expiry_date"] = expiry_date.strftime("%Y-%m-%d")
+            details["duration"] = (expiry_date - issue_date).days // 30
+        except ValueError:
+            pass
+
+    return details
+
+
+@csrf_exempt
+def extract_text(request):
+    if request.method == "POST":
+        document = request.FILES.get("document")
+
+        if not document:
+            return JsonResponse({"error": "No document provided"}, status=400)
+
+        text = extract_text_from_pdf(document)
+        extracted_data = parse_license_details(text)
+
+        return JsonResponse(extracted_data)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+@csrf_exempt
+def create_license(request):
+    if request.method == "POST":
+        data = request.POST
+        document = request.FILES.get("document")
+
+        extracted_data = {}
+        if document:
+            text = extract_text_from_pdf(document)
+            extracted_data = parse_license_details(text)
+            print("Extracted Data:", extracted_data)
+
+        # Use extracted data if available, otherwise take manual input
+        subscription_type = extracted_data.get("subscription_type", data.get("subscription_type"))
+        service_provider = extracted_data.get("service_provider", data.get("service_provider"))
+        amount_paid = extracted_data.get("amount_paid", data.get("amount_paid"))
+        duration = extracted_data.get("duration", data.get("duration"))
+        issue_date = extracted_data.get("issue_date", data.get("issue_date"))
+        expiry_date = extracted_data.get("expiry_date", data.get("expiry_date"))
+
+        if not all([subscription_type, service_provider, amount_paid, duration, issue_date, expiry_date]):
+            return JsonResponse({"detail": "Missing required fields"}, status=400)
         
-    print("No expiry date found in text") 
-    return None
+        provider_instance, created = Providers.objects.get_or_create(service_provider=service_provider, defaults={
+            "address": "Unknown Address",
+            "description": "Subscription service provider/vendeor"
+        })
 
-def detect_issuing_authority(text):
-    known_vendors = ["Safaricom Limited", "Microsoft", "Oracle", "Adobe", "IBM"]
-    for vendor in known_vendors:
-        if vendor.lower() in text.lower():
-            return vendor
-    return "Unknown"
-
-
-def detect_expiry_date(text):
-    date_range_pattern = r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})"
-    # date_patterns = [
-    #     r"Expiry\s*Date[:\s]*(\d{2}/\d{2}/\d{4})",
-    #     r"Due\s*Date[:\s]*(\d{2}/\d{2}/\d{4})",
-    #     r"(\d{2}/\d{2}/\d{4})"
-    # ]
-
-    matches = re.findall(date_range_pattern, text, re.IGNORECASE)
-    if matches:
-        try:
-            start_date = datetime.strptime(matches[0][0], "%d/%m/%Y").strftime("%Y-%m-%d")
-            end_date = datetime.strptime(matches[0][1], "%d/%m/%Y").strftime("%Y-%m-%d")
-            print(f"Extracted Date: {start_date} to {end_date}")
-            return start_date, end_date
-        except ValueError as e:
-            print(f"Date parsing error: {e}")
-            return None
-        
-    print("No expiry date found in text")  # Debugging
-    return None
-        
-    # for pattern in date_patterns:
-    #     matches = re.findall(pattern, text, re.IGNORECASE)
-    #     if matches:
-    #         try:
-    #             parsed_date = datetime.strptime(matches[0], "%d/%m/%Y").strftime("%Y-%m-%d")
-    #             print(f"Extracted Expiry Date: {parsed_date}")  # Debugging
-    #             return parsed_date
-    #         except ValueError as e:
-    #             print(f"Date parsing error: {e}")
-    #             return None
-    
-   
-
-
-
-@api_view(['POST'])
-def upload_software(request):
-    # if request.user.is_authenticated:
-    #     user = Users.objects.get(user=request.user)
-    
-
-    # if request.method == 'POST':
-    #     name = request.POST.get('name') 
-        
-        # if not name:
-        #     return HttpResponse("Name is required", status=400)
-
-
-    try:
-        print("Received request to upload software license")
-    
-        
-        uploaded_file = request.FILES.get("file")
-        if not uploaded_file:
-            return Response({"error": "No file provided"}, status=400)
-        
-        print("Uploaded file:", uploaded_file.name)
-
-        
-        file_path = default_storage.save(f"temp/{uuid.uuid4()}_{uploaded_file.name}", ContentFile(uploaded_file.read()))
-        full_path = default_storage.path(file_path)
-        print("Saved file at:", full_path)
-
-        # Check if user with name exists, if so pick the corresponding email. If not create user with generic unique email
-
-        text = extract_text_from_pdf(full_path)
-        print("Extracted text:", text[:500])
-        
-
-        if not text:
-            return Response({"error": "No text extracted from file"}, status=400)
-
-        # Detect license type
-        type_license = detect_licensetype(text)
-        if not type_license:
-            type_license = request.data.get("type_license")
-            print("Detected:" ,type_license)
-
-
-        valid_choices = [choice[0] for choice in LicenseType.TYPE_LICENSE]
-        if type_license not in valid_choices:
-            return Response({"error": "Invalid license type"}, status=400)
-
-
-        license_type_obj, _ = LicenseType.objects.get_or_create(type_license=type_license)
-
-
-
-        # user_name, _ = Users.objects.get_or_create(
-        #         name=name,
-        #         email=str(uuid.uuid4()) + "@gmail.com"
-        #     )
-
-
-        # name = detect_licensetype(text)
-        # if not name:
-        #     name = request.data.get("name")  # Fallback to request data
-        #     if not name:
-        #         return Response({"error": "License type name is required."}, status=400)
-        
-        # print("Detected License Type:", name)
-        # license_type_obj, _ = LicenseType.objects.get_or_create(name=name)
-
-        # kra_pin = detect_kra_pin(text)
-        # if kra_pin == "Unknown":
-        #     kra_pin = request.data.get("kra_pin")
-        #     print("KRA/PIN:" ,kra_pin)
-
-        # owner = detect_owner(text)
-        # if not owner:
-        #     owner = request.data.get("owner")
-        #     print("Detected:" ,owner)
-
-        # amount = detect_amount(text)
-        # if not amount:
-        #     amount = request.data.get("amount")
-        #     print("Detected:" ,amount)
-
-        # Detect issuing authority
-        provider = detect_issuing_authority(text)
-        if provider == "Unknown":
-            provider = request.data.get("provider")
-            print("Vendor:" ,provider)
-
-
-        issue_date = detect_issue_date(text)
-        expiry_date = detect_expiry_date(text)
-        
-        if not issue_date or not expiry_date:
-            return Response({"error": "Missing issue_date or expiry_date from the extracted text."}, status=400)
-
-        issue_date = issue_date[0] if isinstance(issue_date, tuple) else issue_date
-        expiry_date = expiry_date[1] if isinstance(expiry_date, tuple) else expiry_date
-
-       
-        try:
-            issue_date_obj = datetime.strptime(issue_date, "%Y-%m-%d")
-            expiry_date_obj = datetime.strptime(expiry_date, "%Y-%m-%d")
-            duration = round((expiry_date_obj - issue_date_obj).days / 30)
-        except ValueError as e:
-            print(f"Error in date conversion: {e}")
-            return Response({"error": "Invalid date format."}, status=400)
-
-        if duration <= 0:
-            return Response({'detail': 'Expiry date must be after issue date.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        license = Licenses.objects.create(
-            licensetype=license_type_obj,
-            provider=provider,
+        license_instance = Subscription.objects.create(
+            providers=provider_instance,
+            subscription_type=subscription_type,
+            amount_paid=amount_paid,
             duration=duration,
-            document=uploaded_file,
-            # users=user,
+            issue_date=issue_date,
+            expiry_date=expiry_date,
+            document=document if document else None,
         )
 
-        # Cleanup
-        default_storage.delete(full_path)
-        print("Temporary file deleted.")
+        return JsonResponse({"message": "License created successfully", "license_id": license_instance.id})
 
-        return Response({"message": "Successfully processed software license"}, status=200)
-
-    except Exception as e:
-        print("Unhandled error:", str(e))
-        print("Traceback:", traceback.format_exc())
-        return Response({"error": "Internal Server Error", "details": str(e)}, status=500)
+    return JsonResponse({"detail": "Invalid request method"}, status=405)
 
 
 @api_view(['GET'])
 def list_software(request):
  
-    licenses = Licenses.objects.all()
-    serializer = LicensesSerializer(licenses, many=True)
+    licenses = Subscription.objects.all()
+    serializer = SubscriptionSerializer(licenses, many=True)
     return Response(serializer.data)
 
 
 @api_view(['GET'])
 def get_software(request, id):
     try:
-        license_obj = Licenses.objects.get(id=id)
-        serializer = LicensesSerializer(license_obj)
+        license_obj = Subscription.objects.get(id=id)
+        serializer = SubscriptionSerializer(license_obj)
         return Response(serializer.data)
-    except Licenses.DoesNotExist:
+    except Subscription.DoesNotExist:
         return Response({"error": "Software License not found"}, status=404)
 
-
-@api_view(['PUT', 'PATCH'])
-def update_software(request, id):
-    license_obj = get_object_or_404(Licenses, id=id)
-    serializer = LicensesSerializer(license_obj, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=400)
-
-
+# ----DELETE--- #
 @api_view(['DELETE'])
 def delete_software(request, id):
     try:
-        license_obj = Licenses.objects.get(id=id)
+        license_obj = Subscription.objects.get(id=id)
         license_obj.delete()
         return Response({"message": "License deleted successfully"}, status=204)
-    except Licenses.DoesNotExist:
+    except Subscription.DoesNotExist:
         return Response({"error": "License not found"}, status=404)
-
-
+    
 @api_view(['POST'])
 def trigger_email(request):
     email = request.data.get("email")
@@ -369,83 +206,470 @@ def trigger_email(request):
 
         return Response({"error": str(e)}, status=500)
 
-    
-            # --- LICENSE SOFTWARE --- #
-class LicensesViewSet(viewsets.ModelViewSet):
-    queryset = Licenses.objects.all().prefetch_related('renew')
-    serializer_class = LicensesSerializer
+# ----DOWNLOAD---- #
+def download_subscription (request, id):
+    subscription = get_object_or_404(Subscription, id=id)
 
-    @action(detail=False, methods=["get"])
-    def due_soon(self, request):
-        upcoming_licenses = Licenses.objects.filter(expiry_date__lte=now().date())
-        serializer = self.get_serializer(upcoming_licenses, many=True)
-        return Response(serializer.data)
+    if subscription.document:
+        return FileResponse(subscription.document.open(), as_attachment=True)
+    return HttpResponseNotFound("File not found")
+
+
+
+# ----EDIT/UPDATE---- #
+@api_view(['PUT', 'PATCH'])
+def update_subscription(request, id):
+    try:
+        subscription_instance = Subscription.objects.get(id=id)
+
+    except Subscription.DoesNotExist:
+        return Response({"detail": "Subscription not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    def generate_pdf(self, request):
-        buffer = io.BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=letter)
-        pdf.drawString(100, 750, "Software License Report")
+    serializer = SubscriptionSerializer(subscription_instance, data=request.data, partial=True) 
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ----REPORTS---- #
+
+class SubscriptionReportAPIView(APIView):
+
+    def get(self, request):
+        data = Subscription.objects.aggregate(
+            total_subscriptions=Count('id'),
+            active_subscriptions=Count('id', filter=Q(expiry_date__gte=now().date())),
+            expired_subscriptions=Count('id', filter=Q(expiry_date__lt=now().date())),
+            total_revenue=Sum('amount_paid')
+        )
+
+        return Response(data)
+
+class SubscriptionTypeReportAPIView(APIView):
+
+    def get(self, request):
+        data = Subscription.objects.values('subscription_type').annotate(
+            count=Count('id'),
+            revenue=Sum('amount_paid')
+        )
+        return Response({"subscription_types": list(data)})
+
+class ProvidersListAPIView(APIView):
+
+    def get(self, request):
+        providers = Providers.objects.values("id", "service_provider")
+        return Response({"providers": list(providers)})
+
+class SubscriptionDataAPIView(APIView):
+
+    def get(self, request):
+        data = Subscription.objects.values(
+            "providers__service_provider",
+            "subscription_type",
+            "amount_paid",
+            "issue_date",
+            "expiry_date"
+        )
+        return Response({"list": list(data)})
+
+
+
+
+
+
+#                              ###---USECASE2---###
+# def extract_text_from_pdf(pdf_path):
+#     """Extract text from a PDF file, with OCR for image-based PDFs."""
+#     try:
+#         doc = fitz.open(pdf_path)
+#         text = ""
+
+#         for page_num in range(doc.page_count):
+#             page = doc.load_page(page_num)
+#             page_text = page.get_text("text")
+
+#             if page_text.strip():
+#                 text += page_text
+#             else:
+#                 print(f"No text found in page {page_num + 1}, attempting OCR...")
+#                 pix = page.get_pixmap()
+#                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+#                 ocr_text = pytesseract.image_to_string(img, config="--psm 6")  
+#                 text += ocr_text
+
+#         return text.strip()
+#     except Exception as e:
+#         print(f"Error extracting text from PDF: {e}")
+#         return ""
+
+
+
+# def detect_licensetype(text):
+#     license_keywords = {
+#         "Proprietary": ["Proprietary", "Proprietary"],
+#         "Enterprise": ["Enterprise", "enterprise"]
+#     }
+#     text = text.strip()
+#     for type_license, keywords in license_keywords.items():
+#         for keyword in keywords:
+#             if keyword.lower() in text.lower():
+#                 return type_license
+#     return None
+
+
+# def detect_amount(text):
+#     match = re.search(r'Total\s*Ksh\.(\d{1,3}(?:,\d{3})*(?:\.\d+)?)', text)
+#     if match:
+#         return match.group(1).replace(",", "")
+#     return '0.00'
+
+# def detect_issue_date(text):
+#     date_range_pattern = r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})"
+
+#     matches = re.findall(date_range_pattern, text, re.IGNORECASE)
+#     if matches:
+#         try:
+#             start_date = datetime.strptime(matches[0][0], "%d/%m/%Y").strftime("%Y-%m-%d")
+#             end_date = datetime.strptime(matches[0][1], "%d/%m/%Y").strftime("%Y-%m-%d")
+#             print(f"Extracted Date: {start_date} to {end_date}")
+#             return start_date, end_date
+#         except ValueError as e:
+#             print(f"Date parsing error: {e}")
+#             return None
         
-        licenses = Licenses.objects.all()
-        y = 720
-        for license in licenses:
+#     print("No expiry date found in text") 
+#     return None
+
+# def detect_issuing_authority(text):
+#     known_vendors = ["Safaricom Limited", "Microsoft", "Oracle", "Adobe", "IBM", "Telkom",
+#                      "Airtel", "Google"]
+#     for vendor in known_vendors:
+#         if vendor.lower() in text.lower():
+#             return vendor
+#     return "Unknown"
+
+
+# def detect_expiry_date(text):
+#     date_range_pattern = r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})"
+#     # date_patterns = [
+#     #     r"Expiry\s*Date[:\s]*(\d{2}/\d{2}/\d{4})",
+#     #     r"Due\s*Date[:\s]*(\d{2}/\d{2}/\d{4})",
+#     #     r"(\d{2}/\d{2}/\d{4})"
+#     # ]
+
+#     matches = re.findall(date_range_pattern, text, re.IGNORECASE)
+#     if matches:
+#         try:
+#             start_date = datetime.strptime(matches[0][0], "%d/%m/%Y").strftime("%Y-%m-%d")
+#             end_date = datetime.strptime(matches[0][1], "%d/%m/%Y").strftime("%Y-%m-%d")
+#             print(f"Extracted Date: {start_date} to {end_date}")
+#             return start_date, end_date
+#         except ValueError as e:
+#             print(f"Date parsing error: {e}")
+#             return None
+        
+#     print("No expiry date found in text")  
+#     return None
+    
+   
+
+
+
+# @api_view(['POST'])
+# def upload_software(request):
+    
+
+
+#     try:
+#         print("Received request to upload software license")
+    
+        
+#         uploaded_file = request.FILES.get("file")
+#         if not uploaded_file:
+#             return Response({"error": "No file provided"}, status=400)
+        
+#         print("Uploaded file:", uploaded_file.name)
+
+        
+#         file_path = default_storage.save(f"temp/{uuid.uuid4()}_{uploaded_file.name}", ContentFile(uploaded_file.read()))
+#         full_path = default_storage.path(file_path)
+#         print("Saved file at:", full_path)
+
+#         # Check if user with name exists, if so pick the corresponding email. If not create user with generic unique email
+
+#         text = extract_text_from_pdf(full_path)
+#         print("Extracted text:", text[:500])
+        
+
+#         if not text:
+#             return Response({"error": "No text extracted from file"}, status=400)
+
+#         # Detect license type
+#         type_license = detect_licensetype(text)
+#         if not type_license:
+#             type_license = request.data.get("type_license")
+#             print("Detected:" ,type_license)
+
+
+#         valid_choices = [choice[0] for choice in LicenseType.TYPE_LICENSE]
+#         if type_license not in valid_choices:
+#             return Response({"error": "Invalid license type"}, status=400)
+
+
+#         license_type_obj, _ = LicenseType.objects.get_or_create(type_license=type_license)
+
+
+#         # Detect issuing authority
+#         provider = detect_issuing_authority(text)
+#         if provider == "Unknown":
+#             provider = request.data.get("provider")
+#             print("Vendor:" ,provider)
+
+
+#         issue_date = detect_issue_date(text)
+#         expiry_date = detect_expiry_date(text)
+        
+#         if not issue_date or not expiry_date:
+#             return Response({"error": "Missing issue_date or expiry_date from the extracted text."}, status=400)
+
+#         issue_date = issue_date[0] if isinstance(issue_date, tuple) else issue_date
+#         expiry_date = expiry_date[1] if isinstance(expiry_date, tuple) else expiry_date
+
+       
+#         try:
+#             issue_date_obj = datetime.strptime(issue_date, "%Y-%m-%d")
+#             expiry_date_obj = datetime.strptime(expiry_date, "%Y-%m-%d")
+#             duration = round((expiry_date_obj - issue_date_obj).days / 30)
+#         except ValueError as e:
+#             print(f"Error in date conversion: {e}")
+#             return Response({"error": "Invalid date format."}, status=400)
+
+#         if duration <= 0:
+#             return Response({'detail': 'Expiry date must be after issue date.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+#         license = Licenses.objects.create(
+#             licensetype=license_type_obj,
+#             provider=provider,
+#             duration=duration,
+#             document=uploaded_file,
+#             # users=user,
+#         )
+
+#         # Cleanup
+#         default_storage.delete(full_path)
+#         print("Temporary file deleted.")
+
+#         return Response({"message": "Successfully processed software license"}, status=200)
+
+#     except Exception as e:
+#         print("Unhandled error:", str(e))
+#         print("Traceback:", traceback.format_exc())
+#         return Response({"error": "Internal Server Error", "details": str(e)}, status=500)
+
+
+# @api_view(['GET'])
+# def list_software(request):
+ 
+#     licenses = Licenses.objects.all()
+#     serializer = LicensesSerializer(licenses, many=True)
+#     return Response(serializer.data)
+
+
+# @api_view(['GET'])
+# def get_software(request, id):
+#     try:
+#         license_obj = Licenses.objects.get(id=id)
+#         serializer = LicensesSerializer(license_obj)
+#         return Response(serializer.data)
+#     except Licenses.DoesNotExist:
+#         return Response({"error": "Software License not found"}, status=404)
+
+
+# @api_view(['PUT', 'PATCH'])
+# def update_software(request, id):
+#     license_obj = get_object_or_404(Licenses, id=id)
+#     serializer = LicensesSerializer(license_obj, data=request.data, partial=True)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data)
+#     return Response(serializer.errors, status=400)
+
+
+# @api_view(['DELETE'])
+# def delete_software(request, id):
+#     try:
+#         license_obj = Licenses.objects.get(id=id)
+#         license_obj.delete()
+#         return Response({"message": "License deleted successfully"}, status=204)
+#     except Licenses.DoesNotExist:
+#         return Response({"error": "License not found"}, status=404)
+
+# @csrf_exempt
+# def license_add(request):
+#     if request.method == 'POST':
+        
+#         license_types = list(LicenseType.objects.all().values_list('type_license', flat=True))
+        
             
-            issuing_authority = str(license.provider)  
-            license_type = str(license.licensetype.name) 
-            expiry_date = str(license.duration)  
-            pdf.drawString(100, y, f"{issuing_authority} {license_type} - Exp: {expiry_date}")
-            y -= 20
+#         full_name = request.POST.get('fullName')
+#         licensetype_name = request.POST.get('licensetype')  
+#         email = request.POST.get('email')
+#         phone_number = request.POST.get('phone_number')
+#         provider = request.POST.get('provider')
+#         amount = request.POST.get('amount')
+#         duration = request.POST.get('duration')
+#         document = request.FILES.get('document')
 
-        pdf.showPage()
-        pdf.save()
+        
 
-        buffer.seek(0)
-        return HttpResponse(buffer, content_type="application/pdf")
+        
+#         if not full_name or not licensetype_name or not email or not phone_number or not provider or not amount or not duration or not document:
+#             return JsonResponse({'detail': 'All fields are required.'}, status=400)
 
-    @action(detail=False, methods=["get"])
-    def generate_excel(self, request):
-        licenses = Licenses.objects.all()
-        data = [
-            {
-                "Name": l,
-                "Issuing Authority": l.provider,
-                "Type": l.licensetype.name,
-                "Expiry Date": l.expiry_date,
-                "Status": "Active" if l.expiry_date >= datetime.today().date() else "Expired"
-            }
-            for l in licenses
-        ]
+#         try:
+#             user_instance = Users.objects.get(email=email) 
+#         except Users.DoesNotExist:
+           
+#             user_instance = Users.objects.create(
+#                 name=full_name,
+#                 email=email,
+#                 phone_number=phone_number
+#             )
 
-        df = pd.DataFrame(data)
-        buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
-            df.to_excel(writer, sheet_name="Licenses", index=False)
+#             # Users("name","phone","email")
+#             # Users(name="value",phone_number="value",email="value")
 
-        buffer.seek(0)
-        return HttpResponse(buffer, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+#         try:
+#             license_type_instance = LicenseType.objects.get(type_license=licensetype_name)
+#         except LicenseType.DoesNotExist:
+#             return JsonResponse({'error': f'License Type "{licensetype_name}" does not exist.'}, status=400)
+        
+#         license_instance = Licenses.objects.create(
+#             users=user_instance,
+#             licensetype=license_type_instance,
+#             provider=provider,
+#             duration=duration,
+#             document=document,
+#         )
+
+#         return JsonResponse({'detail': 'License added successfully!', 'license_id': license_instance.id})
+
+#         return JsonResponse({'available_license_types': license_types})
+
+#     return JsonResponse({'detail': 'Invalid request method'}, status=405)
+
+    
+# class EditLicense(APIView):
+#     def put(self, request, license_id):
+#         try:
+#             software_license = Licenses.objects.get(id=license_id)
+#         except Licenses.DoesNotExist:
+#             return Response({"error": "License not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#         serializer = LicensesSerializer(software_license, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-        # --- RENEW --- #
-class RenewSoftwareAPI(APIView):
-    def put(self, request, id, *args, **kwargs):
-        try:
-            license_obj = Licenses.objects.get(id=id)
-            current_expiry_date = license_obj.expiry_date
+
+
+# @api_view(['POST'])
+# def trigger_email(request):
+#     email = request.data.get("email")
+
+#     if not email:
+#         return Response({"message": "Email needed"}, status=400)
+
+#     try:
+#      send_software_reminder.delay()
+
+#      return Response({"message": "Email Notification triggered!"}, status=200)
+
+#     except Exception as e:
+#         print("Error occured: ", str(e))
+
+#         return Response({"error": str(e)}, status=500)
+
+    
+#             # --- LICENSE SOFTWARE --- #
+# class LicensesViewSet(viewsets.ModelViewSet):
+#     queryset = Licenses.objects.all().prefetch_related('renew')
+#     serializer_class = LicensesSerializer
+
+#     @action(detail=False, methods=["get"])
+#     def due_soon(self, request):
+#         upcoming_licenses = Licenses.objects.filter(expiry_date__lte=now().date())
+#         serializer = self.get_serializer(upcoming_licenses, many=True)
+#         return Response(serializer.data)
+    
+#     def generate_pdf(self, request):
+#         buffer = io.BytesIO()
+#         pdf = canvas.Canvas(buffer, pagesize=letter)
+#         pdf.drawString(100, 750, "Software License Report")
+        
+#         licenses = Licenses.objects.all()
+#         y = 720
+#         for license in licenses:
+            
+#             issuing_authority = str(license.provider)  
+#             license_type = str(license.licensetype.name) 
+#             expiry_date = str(license.duration)  
+#             pdf.drawString(100, y, f"{issuing_authority} {license_type} - Exp: {expiry_date}")
+#             y -= 20
+
+#         pdf.showPage()
+#         pdf.save()
+
+#         buffer.seek(0)
+#         return HttpResponse(buffer, content_type="application/pdf")
+
+#     @action(detail=False, methods=["get"])
+#     def generate_excel(self, request):
+#         licenses = Licenses.objects.all()
+#         data = [
+#             {
+#                 "Name": l,
+#                 "Issuing Authority": l.provider,
+#                 "Type": l.licensetype.name,
+#                 "Expiry Date": l.expiry_date,
+#                 "Status": "Active" if l.expiry_date >= datetime.today().date() else "Expired"
+#             }
+#             for l in licenses
+#         ]
+
+#         df = pd.DataFrame(data)
+#         buffer = io.BytesIO()
+#         with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+#             df.to_excel(writer, sheet_name="Licenses", index=False)
+
+#         buffer.seek(0)
+#         return HttpResponse(buffer, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+#         # --- RENEW --- #
+# class RenewSoftwareAPI(APIView):
+#     def put(self, request, id, *args, **kwargs):
+#         try:
+#             license_obj = Licenses.objects.get(id=id)
+#             current_expiry_date = license_obj.expiry_date
 
            
-            if not request.data.get("new_expiry_date"):
-                new_expiry_date = current_expiry_date + timedelta(days=365)
-            else:
-                new_expiry_date = request.data.get("new_expiry_date")
+#             if not request.data.get("new_expiry_date"):
+#                 new_expiry_date = current_expiry_date + timedelta(days=365)
+#             else:
+#                 new_expiry_date = request.data.get("new_expiry_date")
 
-            # Update the expiry date
-            license_obj.expiry_date = new_expiry_date
-            license_obj.save()
+#             # Update the expiry date
+#             license_obj.expiry_date = new_expiry_date
+#             license_obj.save()
 
-            return Response({"message": f"License renewed until {new_expiry_date}"}, status=status.HTTP_200_OK)
+#             return Response({"message": f"License renewed until {new_expiry_date}"}, status=status.HTTP_200_OK)
 
-        except Licenses.DoesNotExist:
-            return Response({"error": "Software License not found"}, status=status.HTTP_404_NOT_FOUND)
+#         except Licenses.DoesNotExist:
+#             return Response({"error": "Software License not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 

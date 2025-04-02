@@ -1,5 +1,5 @@
 from django.contrib import admin    
-from .models import Users, LicenseType, Licenses, Renewals
+from .models import Users, Providers, Subscription, Renewals
 # from .models import License, User, Renewal, Notification # imports all models defined in model.py in our app
 
 
@@ -10,29 +10,33 @@ from .models import Users, LicenseType, Licenses, Renewals
 
 
                 ###---USECASE2---###
-@admin.register(Users)
+# Register Users model
 class UsersAdmin(admin.ModelAdmin):
     list_display = ('name', 'phone_number', 'email')
     search_fields = ('name', 'email')
-    list_filter = ('phone_number',)
 
-@admin.register(LicenseType)
-class LicenseTypeAdmin(admin.ModelAdmin):
-    list_display = ('type_license', 'description')
-    search_fields = ('type_license',)
-    list_filter = ('type_license',)
+# Register Providers model
+class ProvidersAdmin(admin.ModelAdmin):
+    list_display = ('service_provider', 'address', 'description')
+    search_fields = ('service_provider',)
 
-@admin.register(Licenses)
-class LicensesAdmin(admin.ModelAdmin):
-    list_display = ('provider', 'licensetype', 'users', 'duration', 'document')
-    search_fields = ('provider', 'licensetype__name', 'users__name')  
-    list_filter = ('licensetype', 'users')
+# Register Subscription model
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('subscription_type', 'amount_paid', 'duration', 'issue_date', 'expiry_date', 'providers', 'users')
+    search_fields = ('subscription_type', 'providers__service_provider', 'users__name')
+    list_filter = ('subscription_type', 'providers')
 
-@admin.register(Renewals)
+# Register Renewals model
 class RenewalsAdmin(admin.ModelAdmin):
-    list_display = ('licenses', 'renewal_date', 'expiry_date', 'paid_amount', 'invoice_no')
-    search_fields = ('licenses__provider', 'invoice_no')
-    list_filter = ('renewal_date', 'licenses')
+    list_display = ('subscription', 'renewal_date', 'expiry_date', 'paid_amount', 'invoice_no')
+    search_fields = ('subscription__subscription_type', 'invoice_no')
+    list_filter = ('renewal_date', 'expiry_date')
+
+# Register models to the admin site
+admin.site.register(Users, UsersAdmin)
+admin.site.register(Providers, ProvidersAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)
+admin.site.register(Renewals, RenewalsAdmin)
 
 
 

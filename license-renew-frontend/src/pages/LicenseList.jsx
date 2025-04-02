@@ -15,11 +15,11 @@ const LicenseList = () => {
   };
 
   return (
-    <div style={{ padding: '0' }}>
-      <div style={{ overflowX: 'auto' }}>
+    <div style={{ padding: '0', margin: '0' }}>
+      <div style={{ overflowY: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
-            <tr style={{ backgroundColor: 'lightgray' , color: '#0a51cc'}}>
+            <tr style={{ backgroundColor: 'lightgray' , color: 'black'}}>
               <th style={styles.th}></th>
               <th style={styles.th}>Holder</th>
               <th style={styles.th}>Vendor</th>
@@ -31,12 +31,12 @@ const LicenseList = () => {
           <tbody>
             {licenses.map((license, index) => (
               <tr key={index}   style={{
-                backgroundColor: index % 2 === 0 ? 'white' : 'lightgray',}}>
+                backgroundColor: index % 1 === 0 ? 'white' : 'lightgray',}}>
                 <td style={styles.td}>{index + 1}</td>
                 <td style={styles.td}>{license.owner}</td>
-                <td style={styles.td}>{license.issuing_authority}</td>
+                <td style={styles.td}>{license.providers}</td>
                 <td style={styles.td}>{license.expiry_date}</td>
-                <td style={styles.td}>{license.type_license}</td>
+                <td style={styles.td}>{license.subscription_type}</td>
                 <td style={styles.td}>
                   <button onClick={() => handleView(license.id)} style={styles.viewButton}>
                     View
@@ -53,52 +53,32 @@ const LicenseList = () => {
 
 const styles = {
   th: {
-    padding: '10px',
+    padding: '2px 8px',
     textAlign: 'left',
     borderBottom: '1px solid #ddd',
     borderRight: '0.5px solid #ddd',
+    fontSize: '0.9rem',
   },
   td: {
     borderRight: '1px solid #ddd',
-    padding: '5px',
-    borderBottom: '1px solid #ddd'
+    padding: '2px 8px',
+    borderBottom: '1px solid #ddd',
+    fontSize: '0.7rem',
   },
   tr: {
     backgroundColor: '#fff'
   },
   viewButton: {
-    padding: '5px 10px',
     backgroundColor: '#007bff',
     color: 'white',
     border: 'none',
     borderRadius: '3px',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    borderRadius: '4px',
+    fontSize: '0.7rem',
+    width: '90px',
   }
 };
 
 export default LicenseList;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const handleDelete = async (license_number) => {
-//   if (!window.confirm('Are you sure you want to delete...')) return;
-
-//   try {
-//     await axios.delete(`http://localhost:8000/delete-license/${license_number}/`);
-//     // setLicenses  
-//     console.log('License deleted successfully..!')
-//   } catch (error) {
-//     console.error('Error deleting license:', error);
-//   }
-// };
