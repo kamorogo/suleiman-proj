@@ -5,7 +5,7 @@ const Services = () => {
     <div style={{ background: 'linear-gradient(360deg, rgb(253, 253, 253) 0%, rgb(222, 221, 233) 100%)'}}>
         <style>
             {`
-            .tender-header {
+            .tender-Header {
                 height: 10vh;
                 margin: 0.0rem 2rem;
                 display: flex;
@@ -17,12 +17,12 @@ const Services = () => {
                 padding: 0px;
                 text-align: center;
             }
-            .logo1 {
+            .Logo1 {
                 width: 6rem;
                 height: 6rem;
 
             }
-            .logo2 {
+            .Logo2 {
                 width: 7rem;
                 height: 3.5rem;
 
@@ -33,28 +33,26 @@ const Services = () => {
                 align-items: center;
             }
 
-            .container {
+            .containeR {
                 display: flex;
                 justify-content: center;
                 align-items: stretch;
                 gap: 40px;
             }
 
-            .cards {
+            .cardS {
                 background: white;
                 border-radius: 10px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 2);
                 padding: 2rem;
                 text-align: center;
-                max-width: 300px;
-                width: 100%;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
                 height: 300px; 
             }
 
-            .dp {
+            .DP {
                 width: 100px;
                 height: 100px;
                 border-radius: 50%;
@@ -63,13 +61,13 @@ const Services = () => {
                 display: block;
                 
             }
-            .dp-container {
+            .DP-container {
                 display: flex;
                 justify-content: center;
                 align-items: center;
             }
 
-            .btn {
+            .BTN {
                 display: inline-block;
                 background-color: rgb(54, 88, 183);
                 color: white;
@@ -79,7 +77,7 @@ const Services = () => {
                 margin-top: auto;
             }
 
-            .btn:hover {
+            .BTN:hover {
                 background-color:rgb(184, 133, 67);
             }
             .tender-info h2 {
@@ -90,57 +88,57 @@ const Services = () => {
             `}
         </style>
         <div className='tender'>
-            <div className='tender-header'> 
-                <div className='logo1'>
-                    <img src='/logO.png' className='logo1' alt='logo'/>
+            <div className='tender-Header'> 
+                <div className='Logo1'>
+                    <img src='/logO.png' className='Logo1' alt='logo'/>
                 </div>
-                <div className="logo2">
+                <div className="Logo2">
                     <img src='/2031.png' className='logo2' alt='logo'/>
                 </div>
             </div>
             <h1>Our Services</h1>
             <div className='tender-info'>
                 <h2>We Provide Flexible IT Solutions</h2>
-                <div className='container'>
+                <div className='containeR'>
                 
-                    <div className='cards'>
-                            <div className='dp-container'>
-                                <img src='/web-p.png' className='dp' alt='logo' />
+                    <div className='cardS'>
+                            <div className='DP-container'>
+                                <img src='/web-p.png' className='DP' alt='Logo' />
                             </div>
-                        <h3>Web Portals</h3>
+                        <h2>Web Portals</h2>
                         <p>
                             <ul>
                                 <li>Creation of websites</li>
                                 <li>Manage Admin </li>
                             </ul>
                         </p>
-                        <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='btn'> &gt;&gt;CLICK ME</a>
+                        <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='BTN'> &gt;&gt;CLICK ME</a>
                     </div>
-                    <div className='cards'>
-                            <div className='dp-container'>
-                                <img src='/mobile.webp' className='dp' alt='logo' />
+                    <div className='cardS'>
+                            <div className='DP-container'>
+                                <img src='/mobile.webp' className='DP' alt='Logo' />
                             </div>
-                        <h3>Mobile Apps</h3>
+                        <h2>Mobile Apps</h2>
                         <p>
                             <ul>
                                 <li>Android & iOS Develop</li>
                                 <li>UI/UX Design</li>
                             </ul>
                         </p>
-                        <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='btn'> &gt;&gt; CLICK ME</a>
+                        <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='BTN'> &gt;&gt; CLICK ME</a>
                     </div>
-                    <div className='cards'>
-                            <div className='dp-container'>
-                                <img src='/cloud.jpg' className='dp' alt='logo' />
+                    <div className='cardS'>
+                            <div className='DP-container'>
+                                <img src='/cloud.jpg' className='DP' alt='Logo' />
                             </div>
-                        <h3>Cloud Services</h3>
+                        <h2>Cloud Services</h2>
                         <p>
                             <ul>
                                 <li>Cloud Deployment</li>
                                 <li>Server Management</li>
                             </ul>
                         </p>
-                        <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='btn'> &gt;&gt; CLICK ME</a>
+                        <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='BTN'> &gt;&gt; CLICK ME</a>
                     </div>
                 </div>
             </div>

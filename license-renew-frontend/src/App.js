@@ -1,10 +1,52 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home.jsx";
+import About from './pages/About';
+import Contacts from './pages/Contacts';
+import Services from './pages/Services';
+import Reports from './pages/Reports';
+import NotificationsPage from './pages/NotificationsPage';
+import Licenses from './pages/Licenses';
+import Renew from './pages/Renew';
+import Help from './pages/Help';
+import LicenseList from './pages/LicenseList';
+import Providers from './pages/Providers';
+import Manage from './pages/Manage';
+import Create from './pages/Create';
+import SignOut from './pages/SignOut';
+import Mpage from "./Mpage.jsx";
+import ViewProfile from "./components/ViewProfile.jsx";
+import ViewDetails from "./components/ViewDetails.jsx";
 
 
 
 function App() {
     return(
-      <Home />
+      <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Navigate to="/mpage" replace />} />
+            <Route path="/mpage" element={<Mpage />} />
+            <Route path="/logout" element={<SignOut />} />
+
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+                <Route path="/home" element={<Home />} />
+                <Route path="/vprofile" element={<ViewProfile />} />
+                <Route path="/view-details/:id" element={<ViewDetails />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contacts" element={<Contacts />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/providers" element={<Providers />} />
+                <Route path="/manage" element={<Manage />} />
+                <Route path="/licenses" element={<Licenses />} />
+                <Route path="/viewlicense" element={<LicenseList />} />
+                <Route path="/renew" element={<Renew />} />
+                <Route path="/create" element={<Create />} />
+                <Route path="/help" element={<Help />} />
+            </Route>
+        </Routes>
     );
 }
 

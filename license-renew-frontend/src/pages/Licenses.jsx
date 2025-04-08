@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import './Licenses.css'
 import axios from "axios";
 
 const Licenses = () => {
@@ -421,6 +420,331 @@ const handleEditSubmit = async (e) => {
               </div>
             )} */}
         </div>
+      <style jsx >
+        {
+          `
+          .page  {
+              border: 5px solid grey;
+              margin: 10px;  
+              padding: 5px;
+              position: relative;
+          }
+          .previous {
+              color: black;
+              position: absolute;
+              bottom: 10px;
+              left: 10px;
+              padding: 10px 14px;
+              font-size: 18px;
+              border-radius: 50%;
+              text-align: center;
+              font-weight: bold;
+              transition: 0.3s;
+          }
+          .sidenav {
+              margin-top: 20px; 
+              padding: 20px;
+              width: 250px;
+              min-height: 60vh;
+              position: absolute;
+              left: 10px;
+              top: 50px;
+              max-width: 30%;
+              left: 2%;
+              margin-left: 0;
+          }
+          .sidenav h1 {
+              font-weight: normal;
+              font-size: 14px;
+              text-align: center;
+          }
+          .sidenav a {
+              padding: 6px 8px 6px 16px;
+              text-decoration: none;
+              font-size: 14px;
+              font-weight: 600;
+              color: black;
+              display: grid;
+          }
+          .sidenav a:hover {
+              color: #064579;
+          }
+          button {
+              border: none;
+              background: #FFF;
+              border: 1px solid rgba(27, 31, 35, 0.15);
+              border-radius: 6px;
+              padding: 5px 10px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              cursor: pointer;
+              margin-bottom: 30px;  
+              width: 150px;
+              margin-right: 10px;
+              margin-left: 30%;
+          }
+          buttonB {
+              border: none;
+              background: #FFF;
+              border: 1px solid rgba(27, 31, 35, 0.15);
+              border-radius: 6px;
+              padding: 5px 10px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              cursor: pointer;
+              margin-bottom: 30px;  
+              width: 150px;
+              margin-right: 10px;
+              margin-left: 30%;
+
+          }
+          .MAIN {
+              margin-left: 600px; 
+              font-size: 28px; 
+              padding: 0px 10px;
+              height: 82vh;
+              margin-top: 5%;
+              margin-right: 10%;
+          }
+          /* --UPLOAD-- */
+          .file-upload-container {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              height: 95%;
+              width: 100%;
+              padding: 20px;
+              box-sizing: border-box;
+          }
+
+          .file-upload-label {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 100%;
+              border: 2px dashed #ccc;
+              border-radius: 15px;
+              cursor: pointer;
+              text-align: center;
+          }
+
+          .file-upload-content {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+          }
+
+          .upload-icon {
+              width: 50px;
+              height: 50px;
+              color: #555;
+          }
+
+          .upload-text {
+              font-size: 18px;
+          }
+
+          .upload-bold {
+              font-weight: bold;
+          }
+
+          .upload-info {
+              font-size: 14px;
+              color: gray;
+          }
+
+          .file-input {
+              display: none;
+          }
+
+          /* --ADD-- */
+          .create {
+              margin-left: 3%;
+              margin-right: 10%;
+              font-size: 14px;
+              padding: 20px;
+              height: 70vh;
+              margin-top: 5%;
+              background-color: #f9f9f9;
+              border-radius: 10px;
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+              display: flex;
+              justify-content: start;
+              align-items: flex-start;
+              flex-direction: column;
+              overflow-y: auto;
+          }
+
+          .applicationF {
+              display: flex;
+              flex-direction: column;
+              gap: 15px;
+              width: 100%;
+              max-width: 600px;
+          }
+
+          .applicationF input[type="file"] {
+              padding: 10px;
+              font-size: 14px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              background-color: #fff;
+              cursor: pointer;
+          }
+
+          .applicationF input[type="text"],
+          .applicationF input[type="number"],
+          .applicationF input[type="date"] {
+              padding: 10px;
+              font-size: 14px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              background-color: #fff;
+              width: 100%;
+              max-width: 400px;
+          }
+
+          .applicationF input[type="text"]:focus,
+          .applicationF input[type="number"]:focus,
+          .applicationF input[type="date"]:focus {
+              border-color: #5b9bd5;
+              outline: none;
+          }
+
+          .applicationF button {
+              border: none;
+              background-color: #286aa7;
+              color: white;
+              border-radius: 5px;
+              padding: 10px 20px;
+              font-size: 16px;
+              cursor: pointer;
+              width: 150px;
+              margin-top: 20px;
+          }
+
+          .applicationF button:hover {
+              background-color: #5b9bd5;
+          }
+
+          .applicationF button[type="button"] {
+              background-color: #f39c12;
+              margin-bottom: 20px;
+          }
+
+          .applicationF button[type="button"]:hover {
+              background-color: #e67e22;
+          }
+
+
+
+          /* --UPDATE-- */
+          update-container {
+              width: 100%;
+              max-width: 600px;
+              background: #f9f9f9;
+              padding: 20px;
+              border-radius: 1px;
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            
+            .update-form {
+              display: flex;
+              flex-direction: column;
+              padding: 10px;
+              margin: 8px 0;
+              width: 100%;
+              max-width: 500px;
+              font-size: 14px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              background-color: #f9f9f9;
+            }
+            
+            label {
+              margin-bottom: 10px;
+            }
+            
+            .update-input {
+              width: 90%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              margin-bottom: 10px;
+            }
+            .update-button {
+              background: #0a51cc;
+              color: white;
+              padding: 10px;
+              border: none;
+              border-radius: 5px;
+              cursor: pointer;
+              margin-top: 10px;
+            }
+            .update-button:hover {
+              background: #083b99;
+            }
+            
+          /* Laptops and smaller desktops (1200px and below) */
+          @media screen and (max-width: 1200px) {
+              .sidenav {
+                  width: 280px;
+                  left: 1%;
+              }
+              .MAIN {
+                  margin-left: 320px;
+              }
+          }
+
+          /* Tablets (1024px and below) */
+          @media screen and (max-width: 1024px) {
+              .sidenav {
+                  width: 250px;
+                  left: 1%;
+              }
+              .MAIN {
+                  margin-left: 270px;
+              }
+          }
+
+          /* Mobile Phones (768px and below) */
+          @media screen and (max-width: 768px) {
+              .sidenav {
+                  width: 100%;
+                  position: relative;
+                  height: auto;
+                  left: 0;
+                  margin-left: 0;
+                  border-right: none;
+                  border-bottom: 1px solid grey;
+              }
+              .MAIN {
+                  margin-left: 0;
+                  padding: 10px;
+              }
+          }
+
+          /* Small Mobile Phones (480px and below) */
+          @media screen and (max-width: 480px) {
+              .sidenav {
+                  text-align: center;
+                  padding: 5px;
+              }
+          }
+
+          `
+        }
+      </style>
     </div>
   );
 };

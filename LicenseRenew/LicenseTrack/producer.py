@@ -3,7 +3,7 @@ import pika
 import json
 from datetime import datetime
 from django.utils.timezone import timedelta
-from .models import License
+from .models import Subscription
 
 
 def send_renewal_message():
@@ -22,13 +22,13 @@ def send_renewal_message():
         for days in reminder_days:
             target_date = today + timedelta(days=days)
             print("Target Field:", target_date)
-            licenses = License.objects.filter(expiry_date__date=target_date)
+            licenses = Subscription.objects.filter(expiry_date__date=target_date)
 
             for license_obj in licenses:
                 message = {
-                    "license_type": license_obj.license_type,
+                    "license_type": license_obj.subscription_type,
                     "expiry_date": license_obj.expiry_date.date().isoformat(),
-                    "email": license_obj.holder_email,
+                    "email": license_obj.users.email,
                 }
 
                 channel.basic_publish(
@@ -49,42 +49,3 @@ def send_renewal_message():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Assuming RabbitMQ is used for messaging
-#         message_body = {
-#             "email": holder_email,
-#             "license_type": detected_license_type,
-#             "message": "Your license has been successfully uploaded and processed."
-#         }
-
-#         channel = rabbitmq_connection.channel()
-#         channel.queue_declare(queue='license_notifications')
-#         channel.basic_publish(
-#             exchange='',
-#             routing_key='license_notifications',
-#             body=json.dumps(message_body)
-#         )
-
-#         return JsonResponse({
-#             "message": "License uploaded and processed successfully",
-#             "license_type": detected_license_type,
-#             "license_id": license_instance.id
-#         })

@@ -5,63 +5,18 @@ import django
 import os
 
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
-from LicenseTrack.models import Notify 
+from channels.generic.websocket import AsyncWebsocketConsumer 
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LicenseRenew.settings")
 django.setup()
 
 
-
-
-###########################################################################################################################################
-###########################################################################################################################################
-###########################################################################################################################################
-
-
-                ###---USECASE2---###
-class NotificationConsumer(AsyncWebsocketConsumer):
-    async def connect(self):
-        
-        self.room_group_name = "notifications"
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-    async def receive(self, text_data):
-        pass
-
-    async def send_notification(self, event):
-        message = event['message']
-        await self.send(text_data=json.dumps({
-            'message': message
-        }))
-
-
-
-
-
-
-
-###########################################################################################################################################
-###########################################################################################################################################
-###########################################################################################################################################
-
-
                 ###---USECASE2---###
 def callback(ch, method, properties, body):
     data = json.loads(body)
     email = data['email']
-    license_name = data['license_type']
+    license_name = data['subscription_type']
     expiry_date = data['expiry_date']
 
     # Send Email Notification

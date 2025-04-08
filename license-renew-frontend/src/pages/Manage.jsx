@@ -9,13 +9,14 @@ const Manage = () => {
     const [licenseData, setLicenseData] = useState({});
     const [modalVisibility, setModalVisibility] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [id, setId] = useState("")
-
-
+    const [id, setId] = useState("");
+    const [users, setUsers] = useState(null);
     const queryParams = new URLSearchParams(location.search);
     const selectedProvider = queryParams.get("provider") || "";
 
+
     useEffect(() => {
+       
         fetchLicenses();
     }, []);
 
@@ -36,15 +37,35 @@ const Manage = () => {
             setLicenses([]);
         }
     };
+
 // ----EDIT---- //
     const handleEdit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        console.error("My ID", id)
+        console.log("License updated data:", licenseData)
+       
+        const { document, users, ...updatedLicenseData } = licenseData;
+
+        
+        if (!document) {
+            delete updatedLicenseData.document;
+        }
+    
+       
+        if (licenseData.users && licenseData.users.id) {
+            updatedLicenseData.user = licenseData.users.id;  
+        }
 
         try {
-            const response = await axios.put(`http://127.0.0.1:8000/license-update/${id}/`, JSON.stringify(licenseData));
-           
+            const response = await axios.put(`http://127.0.0.1:8000/license-update/${id}/`,
+            licenseData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'multipart/form-data', 
+                }
+            });
+    
             if (response.status === 200) {
                 alert("License updated successfully");
                 fetchLicenses();
@@ -68,17 +89,6 @@ const Manage = () => {
         setModalVisibility(false);
     };
 
-// ----DELETE---- //
-    const handleDelete = async (id) => {
-        if (!window.confirm(`Are you sure you want to delete this license?`)) return;
-        try {
-            await axios.delete(`http://localhost:8000/license-delete/${id}/`);
-            setLicenses(licenses.filter(l => l.id !== id));
-            fetchLicenses();
-        } catch (error) {
-            console.error("Error deleting license:", error);
-        }
-    };
 
 
 // ----DOWNLOAD---- //
@@ -127,18 +137,22 @@ const Manage = () => {
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredLicenses.map((license, index) => (
+                {filteredLicenses.map((license, index) => (
                         <tr key={license.id}>
                             <td>{index + 1}</td>
+                            <td>{license.users ? license.users.name : 'N/A'}</td>
+                            <td>{license.users ? license.users.email : 'N/A'}</td>
                             <td>{license.subscription_type}</td>
                             <td>{license.providers}</td>
                             <td>{license.duration} months</td>
                             <td className="action-buttons">
                                 <button onClick={() => openEditModal(license)} className="edit-button">EDIT</button>
-                                <button onClick={() => handleDelete(license.id)} className="delete-button">DELETE</button>
+                                <Link to={`/view-details/${license.id}`} className="view-button">VIEW</Link>
                                 <button onClick={() => handleDownload(license.id)} className="download-button">DOWNLOAD</button>
                             </td>
                         </tr>
@@ -206,11 +220,13 @@ const Manage = () => {
                                 onChange={(e) => setLicenseData({ ...licenseData, document: e.target.files[0] })}
                             />
                         </div>
-                        <div>
-                            <button type="submit" disabled={loading}>
-                                {loading ? "Updating..." : "Save Changes"}
-                            </button>
-                            <button type="button-c" onClick={closeEditModal}>Cancel</button>
+                        <div className="BUTTONS">
+                            <div className="Action-btns">
+                                <button type="submit" disabled={loading}>
+                                    {loading ? "Updating..." : "Save"}
+                                </button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <button type="button-c" onClick={closeEditModal}>Cancel</button>
+                            </div>
                         </div>
                     </form>
 
@@ -271,7 +287,7 @@ const Manage = () => {
                     justify-content: end;
                     gap: 5px;
                 }
-                .edit-button, .delete-button, .download-button {
+                .edit-button, .view-button, .download-button {
                     padding: 2px 8px;
                     font-size: 12px;
                     border: none;
@@ -285,8 +301,8 @@ const Manage = () => {
                     background-color: #4CAF50;
                     color: white;
                 }
-                .delete-button {
-                    background-color: #F44336;
+                .view-button {
+                    background-color: #000000;
                     color: white;
                 }
                 .download-button {
@@ -333,20 +349,33 @@ const Manage = () => {
                 }
                 .modal form button {
                     padding: 10px 15px;
-                    font-size: 1rem;
+                    font-size: 0.9rem;
                     border-radius: 5px;
                     cursor: pointer;
                     margin-top: 10px;
-                    width: 30%;
                 }
                 .modal form button[type="submit"] {
                     background-color: #4CAF50;
                     color: white;
+                     gap: 5px;
                 }
                 .modal form button[type="button-c"] {
                     background-color: #F44336;
                     color: white;
                     margin-top: 5px;
+                }
+                .BUTTONS {
+                    width: 90%;
+                    margin: 0 auto;
+                    justify content: start;
+                    align-items: start; 
+                    gap: 5px;
+                }
+
+                .Action-btns {
+                    width: 300px;
+                    margin: 0 auto;
+                    gap: 5px;
                 }
             `}</style>
         </div>

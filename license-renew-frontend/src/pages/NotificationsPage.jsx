@@ -4,8 +4,7 @@ const NotificationPage = () => {
     const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
-    const csrfToken = document.cookie.split('csrftoken=')[1]; // Get the CSRF token
-
+    const csrfToken = document.cookie.split('csrftoken=')[1];
     fetch("http://localhost:8000/notifications/", {
         method: "GET",
         headers: {

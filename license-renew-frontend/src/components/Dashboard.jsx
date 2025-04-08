@@ -15,13 +15,31 @@ const Dashboard = () => {
                     <ul>
                         <li><a href="#home">Home</a></li>
                         <li><a href="/contacts">Contact Us</a></li>
-                        <li><a href="#logout">Log Out</a></li>
+                        <li><a href="/about">About</a></li>
                         <li><a href="/services">Services</a></li>
+                        <li class="user-profile">
+                            <label for="profile-toggle" class="user-profile">
+                                <img src="user.png" alt="User Icon" class="profile-icon" />
+                                <span><i class="fa-solid fa-caret-down"></i></span>
+                            </label>
+                        </li>
                         <a>
                             <img class="trp-flag-image" src="https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Kenya.svg" width="18" height="12" alt="SW" /> KE
                         </a>
                     </ul>
                 </nav>
+
+                <input type="checkbox" id="profile-toggle" class="modal-toggle" hidden />
+                
+                <div class="modal-overlay">
+                    <div class="modal-content">
+                        <label for="profile-toggle" class="close-btn">&times;</label>
+                        <h2>User Profile</h2>
+                    
+                        <button class="action-Btn"><Link to="/vprofile">View Profile</Link></button>
+                        <button class="action-Btn"><Link to="/mpage">Log Out</Link></button>
+                    </div>
+                </div>
             </headeR>
             <div className='page1-main'>
                 <div className='pg1-container'>
@@ -301,6 +319,13 @@ const Dashboard = () => {
                 </div>
            </div>
         </footer>
+        <style jsx >
+            {
+                `
+               
+                `
+            }
+        </style>
     </div>            
   )
 }

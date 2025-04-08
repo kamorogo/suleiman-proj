@@ -1,42 +1,38 @@
 from celery import shared_task
-from django.utils.timezone import now
-from django.utils import timezone
 from django.core.mail import send_mail
 import traceback
-from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta
+from datetime import timedelta
+from django.utils.timezone import now
 from .models import Subscription
 
 
-
-###########################################################################################################################################
-###########################################################################################################################################
-###########################################################################################################################################
-
-
                 ######---USECASE2---#####
-     
 @shared_task
 def send_software_reminder():
 
+    print("Starting...")
+
     try:
+        print("Sending")
         today = now().date()
-        license_obj = Subscription.objects.all()
+        print("Sent")
 
         for days in [30, 15, 7]:
             reminder_date = today + timedelta(days=days)
             expiring_licenses = Subscription.objects.filter(expiry_date=reminder_date)
+            print(f"Found {expiring_licenses.count()} expiring licenses for {reminder_date}")
 
 
             
             for license_obj in expiring_licenses:
-                if license_obj.users and license_obj.users.email:
-                    subject = f"Reminder: Your {license_obj.licensetype.type_license} License Expires Soon"
+                if getattr(license_obj, 'users', None) and getattr(license_obj.users, 'email', None):
+
+                    subject = f"Reminder: Your {license_obj.subscription_type} License Expires Soon"
                     message = f"""
                     Dear Customer,
 
-                    Your software license for {license_obj.provider} is set to expire on {license_obj.expiry_date}.
+                    Your software license for {license_obj.providers.service_provider} is set to expire on {license_obj.expiry_date}.
                     Please renew it to avoid stress and other delays.
 
                     Thank you,
@@ -55,33 +51,9 @@ def send_software_reminder():
     
     except Exception as e:
 
-        traceback.print_exec()
+        traceback.print_exc()
+    
+        return str(e)
 
 
 
-
-
-
-###########################################################################################################################################
-###########################################################################################################################################
-###########################################################################################################################################
-
-
-                ######---USECASE1---#####
-# @shared_task
-# def send_renewal_reminder():
-#     today = timezone.now().date()
-#     licenses = License.objects.filter(expiry_date__gte=today)
-
-#     for license in licenses:
-        
-#         expiry_date = license.expiry_date
-#         if (expiry_date - today).days <= 30:
-#             send_mail(
-#                 'License Renewal Reminder',
-#                 f'Your {license.license_type} license is due for renewal soon. Expiry date: {expiry_date}.',
-                
-#                 [license.User.email],
-#                 fail_silently=False,
-#             )
-#     return 'Renewal reminders sent.'
