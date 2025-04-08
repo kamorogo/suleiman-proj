@@ -203,6 +203,46 @@ const ReportsOutput = ({ data }) => {
           th {
             background-color: #f1f1f1;
           }
+           @media (max-width: 1024px) {
+            .summary {
+              grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-container {
+              grid-template-columns: 1fr;
+            }
+
+            .chart-item {
+              text-align: center;
+            }
+          }
+
+      @media (max-width: 600px) {
+        .summary {
+          grid-template-columns: 1fr;
+        }
+
+        .metric-item h2 {
+          font-size: 0.9rem;
+        }
+
+        .metric-item p {
+          font-size: 1rem;
+        }
+
+        .reports-container {
+          padding: 1rem;
+        }
+
+        .chart-item {
+          padding: 0.75rem;
+        }
+
+        table th, table td {
+          padding: 0.5rem;
+          font-size: 0.85rem;
+        }
+      }
         `}
       </style>
     </div>

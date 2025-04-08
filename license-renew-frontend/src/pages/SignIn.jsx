@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const SignIn = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -28,11 +29,15 @@ const SignIn = () => {
       });
 
       const data = await response.json();
-      console.log(data); 
+
+      console.log("Login response:", data); 
+
       if (response.ok) {
-        localStorage.setItem("token", data.access);
+        localStorage.setItem("token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh);
         localStorage.setItem("user", JSON.stringify(data.user));
+        console.log("Token Stored:", localStorage.getItem("token"));
+
         navigate("/home");
       } else {
         setError(data?.message || "Invalid credentials");
@@ -41,6 +46,7 @@ const SignIn = () => {
       setError("An error occurred. Please try again.");
     }
   };
+
 
   return (
     <div className="signin-container">

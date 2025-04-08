@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const Create = () => {
-    // State for form data
+   
     const [formData, setFormData] = useState({
         subscription_type: "",
         service_provider: "",
@@ -17,41 +17,15 @@ const Create = () => {
 
 
     console.log("Token from localStorage:", token);
-
-
-    const refreshAccessToken = async () => {
-        const refreshToken = localStorage.getItem('refresh');
-        if (!refreshToken) {
-            console.error("No refresh token found.");
-            return null;
-        }
     
-        try {
-            const response = await axios.post("http://127.0.0.1:8000/api/token/refresh/", {
-                refresh: refreshToken,
-            });
-            const newAccessToken = response.data.access;
-            localStorage.setItem("token", newAccessToken);  
-            return newAccessToken;
-        } catch (error) {
-            console.error("Error refreshing access token:", error);
-            return null;
-        }
-    };
-    
-
-
-    // Handle form input changes
     const handleChanges = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // Handle file input change
     const handleFileChanges = (e) => {
         setFile(e.target.files[0]);
     };
 
-    // Handle file upload and data extraction
     const handleUpload = async () => {
         if (!file) {
             alert("Please select a file first!");
@@ -85,15 +59,13 @@ const Create = () => {
         }
     };
 
-    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!token) {
-            alert("You must be logged in to create a license.");
+            alert("Token not found. Please log in.");
             return;
         }
-
 
         const data = new FormData();
         Object.keys(formData).forEach((key) => {
@@ -112,33 +84,23 @@ const Create = () => {
                 }
             );
             alert("License Created Successfully!");
+            setFormData({
+                subscription_type: "",
+                service_provider: "",
+                amount_paid: "",
+                duration: "",
+                issue_date: "",
+                expiry_date: "",
+            });
+            setFile(null);
+
         } catch (error) {
-            
             if (
                 error.response &&
                 error.response.data &&
                 error.response.data.code === "token_not_valid"
             ) {
-                const newToken = await refreshAccessToken();
-                if (newToken) {
-                    try {
-                        const retryResponse = await axios.post(
-                            "http://127.0.0.1:8000/api/license-add/",
-                            data,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${newToken}`,
-                                },
-                            }
-                        );
-                        alert("License Created Successfully!");
-                    } catch (retryError) {
-                        console.error("Retry Error:", retryError);
-                        alert("Failed to create license after refreshing token.");
-                    }
-                } else {
-                    alert("Session expired. Please log in again.");
-                }
+                alert("Session expired. Please log in again."); 
             } else {
                 console.error("Error:", error);
                 alert("Failed to create license.");
@@ -224,6 +186,58 @@ const Create = () => {
                 .btn-C:hover {
                     background-color:rgb(144, 154, 199);
                 }
+                @media (max-width: 768px) {
+                    .main {
+                        width: 90%;
+                        padding: 10px;
+                    }
+
+                    .header h1 {
+                        font-size: 24px;
+                        text-align: center;
+                    }
+
+                    .applicationf h3 {
+                        font-size: 16px;
+                    }
+
+                    .fcontrol {
+                        font-size: 14px;
+                        padding: 6px;
+                    }
+
+                    .btn-C {
+                        width: 100%;
+                        padding: 10px;
+                        font-size: 16px;
+                    }
+
+                    .btn-R {
+                        margin-top: 10px;
+                        width: 100%;
+                        padding: 10px;
+                    }
+
+                    label {
+                        font-size: 14px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .header h1 {
+                        font-size: 20px;
+                    }
+
+                    .btn-C, .btn-R {
+                        font-size: 14px;
+                        padding: 8px;
+                    }
+
+                    .fcontrol {
+                        font-size: 13px;
+                    }
+                }
+
             `}</style>
 
             <form onSubmit={handleSubmit} className="applicationf">

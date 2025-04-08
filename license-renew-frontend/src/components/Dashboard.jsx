@@ -34,10 +34,24 @@ const Dashboard = () => {
                 <div class="modal-overlay">
                     <div class="modal-content">
                         <label for="profile-toggle" class="close-btn">&times;</label>
-                        <h2>User Profile</h2>
+                        <div className="license-profile-image">
+
+                            <h1>User Profile</h1>
+                    
+                        {/* <img 
+                            src={licenseData.profile_picture 
+                                ? `http://127.0.0.1:8000${licenseData.profile_picture}` 
+                                : "/user.png"
+                            } 
+                            alt="" 
+                            className="profile-image-img"
+                        />
+                    
+                    <p className="username">{licenseData.users?.name}</p> */}
+                </div>
                     
                         <button class="action-Btn"><Link to="/vprofile">View Profile</Link></button>
-                        <button class="action-Btn"><Link to="/mpage">Log Out</Link></button>
+                        <button class="action-Btn"><Link to="/mpage">Sign Out</Link></button>
                     </div>
                 </div>
             </headeR>

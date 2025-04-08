@@ -96,6 +96,38 @@ const Renew = () => {
                     .btn-R:hover {
                         background-color: #218838;
                     }
+                    @media (max-width: 768px) {
+                        .header h1 {
+                            font-size: 24px;
+                        }
+
+                        .c-file-input,
+                        .btn-R {
+                            width: 100%;
+                        }
+
+                        .fcontrol {
+                            font-size: 14px;
+                        }
+                    }
+
+                    @media (max-width: 480px) {
+                        .applicationf {
+                            padding: 10px;
+                        }
+
+                        .header h1 {
+                            font-size: 20px;
+                        }
+
+                        .applicationf h3 {
+                            font-size: 16px;
+                        }
+
+                        .btn-R {
+                            font-size: 16px;
+                        }
+                    }
                 `}</style>
     
                 <div className="main">

@@ -196,8 +196,9 @@ export default function Providers() {
             
             .provider-select {
               width: 100%;
-              padding: 8px;
+              padding: 4px;
               border: 1px solid #ccc;
+              margin-top: 10px;
             }
             
             .next-button {
@@ -206,7 +207,7 @@ export default function Providers() {
               color: white;
               padding: 10px;
               right: 20px;
-              margin-top: 50px;
+              margin-top: 10px;
               border: none;
               cursor: pointer;
               border-radius: 5px;
@@ -224,6 +225,52 @@ export default function Providers() {
               text-align: center;
               padding: 8px;
               margin-top: auto;
+            }
+            @media (max-width: 1024px) {
+              .main-content {
+                flex-direction: column;
+                height: auto;
+              }
+
+              .left-box,
+              .right-box {
+                width: 100%;
+                margin-bottom: 24px;
+              }
+
+              .next-button {
+                width: 100%;
+              }
+
+              .box-title {
+                text-align: center;
+              }
+            }
+              
+            @media (max-width: 600px) {
+              header {
+                flex-direction: column;
+                align-items: flex-start;
+              }
+
+              .nav-links {
+                margin-top: 10px;
+                display: flex;
+                gap: 12px;
+              }
+
+              .slideshow-container {
+                width: 100%;
+                height: auto;
+              }
+
+              .slide {
+                height: auto;
+              }
+
+              .additional-text {
+                font-size: 0.8rem;
+              }
             }
           `
         }

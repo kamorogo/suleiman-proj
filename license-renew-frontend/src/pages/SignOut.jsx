@@ -19,7 +19,9 @@ const SignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
-    navigate("/sign_in");
+    
+    
+    window.location.replace("/mpage");
   };
 
   return (

@@ -128,9 +128,9 @@ const About = () => {
                 <div className='container'>
                     <div className='card'>
                         <img src='/CEO.jpg' className='dp' alt='logo'/>
-                    <h2>Founder/CEO</h2>
-                    <p>Suleiman Mashuhuli</p>
-                    <a href='https://www.linkedin.com/in/suleiman-mashuhuli/' className='btn'>contacts</a>
+                    <h2>Group MD</h2>
+                    <p>Shamaz Savani</p>
+                    <a href='https://www.linkedin.com/in/shamaz/' className='btn'>contacts</a>
 
                     </div>
                 </div>

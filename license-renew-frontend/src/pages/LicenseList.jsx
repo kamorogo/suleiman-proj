@@ -50,17 +50,39 @@ const LicenseList = () => {
       <style jsx>
         {
           `
-          @media screen and (max-width: 600px) {
-            th, td {
-              font-size: 0.6rem;
-              padding: 6px;
-            }
+        .table {
+          width: 100%;
+          border-collapse: collapse;
+        }
 
-            .viewButton {
-              font-size: 0.6rem;
-              width: 70px;
-            }
+        .th, .td {
+          padding: 8px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+          font-size: 1rem;
+        }
+
+        .viewButton {
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 0.8rem;
+          width: 90px;
+        }
+
+        @media screen and (max-width: 600px) {
+          .th, .td {
+            font-size: 0.6rem;
+            padding: 6px;
           }
+
+          .viewButton {
+            font-size: 0.6rem;
+            width: 70px;
+          }
+        }
           `
         }
       </style>
@@ -105,6 +127,7 @@ const styles = {
     fontSize: '0.8rem',
     width: '90px',
   },
+  
 };
 
 export default LicenseList;

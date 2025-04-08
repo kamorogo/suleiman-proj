@@ -363,7 +363,7 @@ const Manage = () => {
                     background-color: #F44336;
                     color: white;
                     margin-top: 5px;
-                }
+                }9
                 .BUTTONS {
                     width: 90%;
                     margin: 0 auto;
@@ -377,6 +377,82 @@ const Manage = () => {
                     margin: 0 auto;
                     gap: 5px;
                 }
+                @media (max-width: 768px) {
+                    .LOWER {
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 10px;
+                    }
+
+                    .add-button {
+                        width: 100%;
+                        text-align: center;
+                    }
+
+                    .license-table thead {
+                        display: none;
+                    }
+
+                    .license-table,
+                    .license-table tbody,
+                    .license-table tr,
+                    .license-table td {
+                        display: block;
+                        width: 100%;
+                    }
+
+                    .license-table tr {
+                        margin-bottom: 15px;
+                        border: 1px solid #ddd;
+                        border-radius: 5px;
+                        padding: 10px;
+                    }
+
+                    .license-table td {
+                        text-align: left;
+                        padding-left: 50%;
+                        position: relative;
+                        font-size: 0.85rem;
+                    }
+
+                    .license-table td::before {
+                        position: absolute;
+                        top: 5px;
+                        left: 10px;
+                        width: 45%;
+                        padding-right: 10px;
+                        white-space: nowrap;
+                        font-weight: bold;
+                        content: attr(data-label);
+                    }
+
+                    .action-buttons {
+                        flex-direction: column;
+                        gap: 5px;
+                    }
+
+                    .edit-button, .view-button, .download-button {
+                        width: 100%;
+                        font-size: 0.75rem;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .modal-content {
+                        width: 90%;
+                        height: 80%;
+                    }
+
+                    .Action-btns {
+                        flex-direction: column;
+                        width: 100%;
+                    }
+
+                    .modal form button {
+                        width: 100%;
+                    }
+                }
+
             `}</style>
         </div>
     );

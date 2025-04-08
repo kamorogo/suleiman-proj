@@ -60,16 +60,20 @@ const ViewDetails = () => {
 
 
 
-
     return (
         <div className="license-detail-container">
             <div className="license-detail-body">
 
+                {licenses.map((license) =>(
+                <div key={license.id} >
+            
                 <div className="delete-container">
                     <label>Want to delete license? &nbsp;</label>
-                    <button onClick={() => handleDelete(licenses.id)} className="delete-button">DELETE</button>
+                    <button onClick={() => handleDelete(license.id)} className="delete-button">DELETE</button>
                 </div>
-
+                
+                </div>
+                ))}
           
                 <div className="license-image">
                     
