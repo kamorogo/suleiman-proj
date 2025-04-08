@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, Link } from "react-router-dom";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
@@ -19,8 +18,6 @@ const SignIn = () => {
     e.preventDefault();
     setError("");
 
-    console.log(formData); 
-
     try {
       const response = await fetch("http://127.0.0.1:8000/user/sign_in/", {
         method: "POST",
@@ -30,14 +27,10 @@ const SignIn = () => {
 
       const data = await response.json();
 
-      console.log("Login response:", data); 
-
       if (response.ok) {
         localStorage.setItem("token", data.access_token);
         localStorage.setItem("refresh_token", data.refresh);
         localStorage.setItem("user", JSON.stringify(data.user));
-        console.log("Token Stored:", localStorage.getItem("token"));
-
         navigate("/home");
       } else {
         setError(data?.message || "Invalid credentials");
@@ -47,36 +40,49 @@ const SignIn = () => {
     }
   };
 
-
   return (
-    <div className="signin-container">
-      <h2>Sign In</h2>
-      {error && <p className="error-message">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">Sign In</button>
-      </form>
+    <div className="signin-page">
+      <div className="signin-container">
+        <h2>Sign In</h2>
+        {error && <p className="error-message">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={handleChange}
+            required
+          />
+          <button type="submit">Sign In</button>
+        </form>
+        <p className="signup-link">
+          Don't have an account? <Link to="/sign_up">Sign Up</Link>
+        </p>
+      </div>
+
       <style jsx>
         {`
+          /* Center the entire page */
+          .signin-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+          }
+
           .signin-container {
             width: 100%;
             max-width: 400px;
-            margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
+            background-color: white;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
           }
@@ -125,6 +131,20 @@ const SignIn = () => {
             text-align: center;
             margin-bottom: 15px;
             font-size: 14px;
+          }
+
+          .signup-link {
+            text-align: center;
+            margin-top: 15px;
+          }
+
+          .signup-link a {
+            color: #007bff;
+            text-decoration: none;
+          }
+
+          .signup-link a:hover {
+            text-decoration: underline;
           }
         `}
       </style>

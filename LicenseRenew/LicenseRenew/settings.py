@@ -215,6 +215,8 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'alisuleimann4@gmail.com'  # Your email address
 EMAIL_HOST_PASSWORD = 'ozgxgfguntjsyauj'  # Your email password
 DEFAULT_FROM_EMAIL = 'alisuleimann4@gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL: False
 
 
 

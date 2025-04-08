@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +35,9 @@ const SignUp = () => {
       const data = await response.json();
       if (response.ok) {
         setSuccess("User registered successfully!");
-        setTimeout(() => navigate("/sign_in"), 2000);
+        setTimeout(() => {
+          navigate("/sign_in");
+        }, 2000);
       } else {
         setError(data?.message || "Failed to register");
       }
@@ -85,6 +87,11 @@ const SignUp = () => {
           required
         />
         <button type="submit">Sign Up</button>
+
+        <p className="signup-link">
+          Already have an account? <Link to="/sign_in">Sign In</Link>
+        </p>
+        
       </form>
 
       <style jsx>
@@ -170,6 +177,20 @@ const SignUp = () => {
           button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
+          }
+            
+          .signup-link {
+            text-align: center;
+            margin-top: 15px;
+          }
+
+          .signup-link a {
+            color: #007bff;
+            text-decoration: none;
+          }
+
+          .signup-link a:hover {
+            text-decoration: underline;
           }
         `}
       </style>

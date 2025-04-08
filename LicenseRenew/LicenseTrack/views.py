@@ -5,6 +5,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LicenseRenew.settings')
 import re
 import traceback
 import sys
+from django.conf import settings
+from django.core.mail import send_mail
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
 import fitz
@@ -317,12 +319,16 @@ class SignUpView(APIView):
             user.set_password(data["password"]) 
             user.save()
 
+            print(f"User {user.username} saved successfully!")
+
             return JsonResponse({"message": "User created successfully"}, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
        
-        except Exception as e:
+        except Exception as e:   
+
+            print(f"Error: {str(e)}")
             return JsonResponse({"error": str(e)}, status=500)
        
 

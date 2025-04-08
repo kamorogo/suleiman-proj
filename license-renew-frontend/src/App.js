@@ -14,18 +14,20 @@ import Providers from './pages/Providers';
 import Manage from './pages/Manage';
 import Create from './pages/Create';
 import SignOut from './pages/SignOut';
-import Mpage from "./Mpage.jsx";
 import ViewProfile from "./components/ViewProfile.jsx";
 import ViewDetails from "./components/ViewDetails.jsx";
-
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 
 
 function App() {
     return(
       <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<Navigate to="/mpage" replace />} />
-            <Route path="/mpage" element={<Mpage />} />
+            <Route path="/" element={<Navigate to="/sign_in" replace />} />
+
+            <Route path="/sign_in" element={<SignIn />} />
+            <Route path="/sign_up" element={<SignUp />} />
             <Route path="/logout" element={<SignOut />} />
 
             {/* Protected Routes */}
