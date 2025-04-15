@@ -45,8 +45,8 @@ class User_Profile(models.Model):
     country = models.CharField(max_length=100, blank=True, null=True)
     region = models.CharField(max_length=100, blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.user.name}'s Profile"
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}".strip()
    
     
 class Providers(models.Model):

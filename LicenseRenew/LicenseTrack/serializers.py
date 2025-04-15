@@ -54,7 +54,13 @@ class User_ProfileSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user', {})
 
         instance.bio = validated_data.get('bio', instance.bio)
-        instance.address = validated_data.get('address', instance.address)
+        instance.address_line1 = validated_data.get('address_line1', instance.address_line1)
+        instance.address_line2 = validated_data.get('address_line2', instance.address_line2)
+        instance.postcode = validated_data.get('postcode', instance.postcode)
+        instance.state = validated_data.get('state', instance.state)
+        instance.country = validated_data.get('country', instance.country)
+        instance.region = validated_data.get('region', instance.region)
+
 
         if 'profile_picture' in validated_data:
             instance.profile_picture = validated_data['profile_picture']

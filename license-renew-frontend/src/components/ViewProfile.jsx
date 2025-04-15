@@ -18,11 +18,8 @@ const ViewProfile = () => {
     state: '',
     area: '',
     email: '',
-    education: '',
     country: '',
     region: '',
-    experience: '',
-    additional_details: '',
     profile_picture: null,
   });
 
@@ -90,9 +87,11 @@ const ViewProfile = () => {
   if (loading) return <div>Loading...</div>;
   if (!profile) return <div>Profile not found.</div>;
 
-  const imageSrc = formData.profile_picture
+  const imageSrc =
+  formData.profile_picture instanceof File
     ? URL.createObjectURL(formData.profile_picture)
-    : profile.profile_picture ||
+    : formData.profile_picture ||
+      profile.profile_picture ||
       'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg';
 
   return (
