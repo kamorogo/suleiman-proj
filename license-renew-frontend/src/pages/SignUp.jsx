@@ -1,18 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
     username: "",
-    name: "",
+    first_name: "",
+    middle_name: "",
+    last_name: "",
     phone_number: "",
     email: "",
     password: "",
   });
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,27 +69,47 @@ const SignUp = () => {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
+          name="first_name"
+          value={formData.first_name}
+          placeholder="First Name"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="middle_name"
+          value={formData.middle_name}
+          placeholder="Middle Name"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="last_name"
+          value={formData.last_name}
+          placeholder="Last Name"
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
           name="username"
+          value={formData.username}
           placeholder="Username"
           onChange={handleChange}
           required
         />
         <input
           type="text"
-          name="name"
-          placeholder="Full Name"
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="text"
           name="phone_number"
+          value={formData.phone_number}
           placeholder="Phone Number"
           onChange={handleChange}
         />
         <input
           type="email"
           name="email"
+          value={formData.email}
           placeholder="Email"
           onChange={handleChange}
           required
@@ -82,6 +117,7 @@ const SignUp = () => {
         <input
           type="password"
           name="password"
+          value={formData.password}
           placeholder="Password"
           onChange={handleChange}
           required
@@ -91,8 +127,8 @@ const SignUp = () => {
         <p className="signup-link">
           Already have an account? <Link to="/sign_in">Sign In</Link>
         </p>
-        
       </form>
+
 
       <style jsx>
         {`
@@ -122,7 +158,7 @@ const SignUp = () => {
 
           h2 {
             text-align: center;
-            font-size: 24px;
+            font-size: 24 px;
             margin-bottom: 20px;
             color: #333;
           }
@@ -143,7 +179,7 @@ const SignUp = () => {
           form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            // gap: 2px;
           }
 
           input {
@@ -151,7 +187,7 @@ const SignUp = () => {
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 16px;
+            font-size: 14px;
           }
 
           input:focus {
@@ -163,7 +199,7 @@ const SignUp = () => {
             padding: 12px;
             background-color: #007bff;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             border: none;
             border-radius: 4px;
             cursor: pointer;

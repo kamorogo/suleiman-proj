@@ -1,26 +1,45 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Create = () => {
    
     const [formData, setFormData] = useState({
-        subscription_type: "",
         service_provider: "",
         amount_paid: "",
-        duration: "",
         issue_date: "",
         expiry_date: "",
+        duration: "",
+        subscription_type: "",
     });
-
+    const navigate = useNavigate();
     const [file, setFile] = useState(null);
     const token = localStorage.getItem('token');
-
-
     console.log("Token from localStorage:", token);
+    const durationToTypeMap = {
+        0: "Trial",
+        1: "Monthly",
+        3: "Quarterly",
+        6: "Semi-Annual",
+        12: "Annual",
+        24: "Biennial",
+        36: "Triennial",
+        48: "Quadrennial",
+    };
     
     const handleChanges = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+    
+        
+        if (name === "duration") {
+            const durationValue = parseInt(value);
+            const subscriptionType = durationToTypeMap[durationValue] || `${durationValue} Months`; 
+            setFormData({ ...formData, [name]: value, subscription_type: subscriptionType });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
+    
 
     const handleFileChanges = (e) => {
         setFile(e.target.files[0]);
@@ -44,12 +63,12 @@ const Create = () => {
             }
 
             setFormData({
-                subscription_type: response.data.subscription_type || "",
                 service_provider: response.data.service_provider || "",
                 amount_paid: response.data.amount_paid || "",
-                duration: response.data.duration || "",
                 issue_date: response.data.issue_date || "",
                 expiry_date: response.data.expiry_date || "",
+                duration: response.data.duration || "",
+                subscription_type: response.data.subscription_type || "",
             });
 
             alert("Text extracted and form pre-filled!");
@@ -84,13 +103,14 @@ const Create = () => {
                 }
             );
             alert("License Created Successfully!");
+            navigate("/manage");
             setFormData({
-                subscription_type: "",
                 service_provider: "",
                 amount_paid: "",
-                duration: "",
                 issue_date: "",
                 expiry_date: "",
+                duration: "",
+                subscription_type: "",
             });
             setFile(null);
 
@@ -245,9 +265,7 @@ const Create = () => {
                 <input type="file" onChange={handleFileChanges} className="c-file-input" />
                 <button type="button" onClick={handleUpload} className="btn-R">Extract Data</button>
 
-                <label>Subscription Type: </label>
-                <input type="text" name="subscription_type" value={formData.subscription_type} onChange={handleChanges} className="fcontrol" placeholder="Subscription Type" />
-
+                
                 <label>Service Provider: </label>
                 <select name="service_provider" value={formData.service_provider} onChange={handleChanges} className="fcontrol">
                     <option value="">Service provider</option>
@@ -259,14 +277,17 @@ const Create = () => {
                 <label>Amount Paid: </label>
                 <input type="number" name="amount_paid" value={formData.amount_paid} onChange={handleChanges} className="fcontrol" placeholder="Amount Paid" />
 
-                <label>Duration (Months): <span>*</span></label>
-                <input type="number" name="duration" value={formData.duration} onChange={handleChanges} className="fcontrol" placeholder="Duration" />
-
                 <label>Issued On: </label>
                 <input type="date" name="issue_date" value={formData.issue_date} onChange={handleChanges} className="fcontrol" />
 
                 <label>Expires On: </label>
                 <input type="date" name="expiry_date" value={formData.expiry_date} onChange={handleChanges} className="fcontrol" />
+
+                <label>Duration (Months): <span>*</span></label>
+                <input type="number" name="duration" value={formData.duration} onChange={handleChanges} className="fcontrol" placeholder="Duration" />
+
+                <label>Subscription Type: </label>
+                <input type="text" name="subscription_type" value={formData.subscription_type} onChange={handleChanges} className="fcontrol" placeholder="Subscription Type" />
 
                 <button type="submit" className="btn-C">Submit</button>
             </form>

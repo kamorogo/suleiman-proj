@@ -25,9 +25,13 @@ const ReportsOutput = ({ data }) => {
 
     fetch("http://127.0.0.1:8000/reports/subscription-data/")
       .then(res => res.json())
-      .then(data => { setSubscriptionData(data.list || []); })
+      .then(data => {
+        console.log("Fetched:", data.list);
+        setSubscriptionData(data.list || []); })
       .catch(error => console.error("Error fetching subscription data:", error));
   }, []);
+  console.log("Subscription Data:", subscriptionData);
+
 
   return (
     <div className="reports-container">
@@ -87,7 +91,7 @@ const ReportsOutput = ({ data }) => {
       
       <div className="data-table-container">
         <h2>Subscription Data</h2>
-        <Table>
+        <table>
           <thead>
             <tr>
               <th>Provider</th>
@@ -100,7 +104,7 @@ const ReportsOutput = ({ data }) => {
           <tbody>
             {subscriptionData?.map((sub, index) => (
               <tr key={index}>
-                <td>{sub.provider_service_provider || "N/A"}</td>
+                <td>{sub.providers__service_provider || "N/A"}</td>
                 <td>{sub.subscription_type || "N/A"}</td>
                 <td>Kshs.{sub.amount_paid || "0.00"}</td>
                 <td>{sub.issue_date || "N/A"}</td>
@@ -108,11 +112,11 @@ const ReportsOutput = ({ data }) => {
               </tr>
             ))}
           </tbody>
-        </Table>
+        </table>
       </div>
 
       {/* Styles */}
-      <style jsx>
+      <style>
         {`
           .reports-container {
             padding: 1.5rem;

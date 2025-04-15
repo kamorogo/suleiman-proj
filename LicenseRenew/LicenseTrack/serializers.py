@@ -2,11 +2,9 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from drf_writable_nested import WritableNestedModelSerializer
-from .models import Subscription, Users, Renewals, Providers
+from .models import Subscription, Users, Renewals, Providers, User_Profile
 
 
-
-                ###---USECASE2---###
 class ProvidersSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -16,7 +14,7 @@ class ProvidersSerializer(serializers.ModelSerializer):
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ['id', 'username', 'password', 'name', 'phone_number', 'email']
+        fields = ['id', 'username', 'password', 'first_name', 'middle_name', 'last_name', 'phone_number', 'email']
 
 class SubscriptionSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     providers = serializers.CharField(source='providers.service_provider')
@@ -25,7 +23,7 @@ class SubscriptionSerializer(WritableNestedModelSerializer, serializers.ModelSer
 
     class Meta:
         model = Subscription
-        fields = ['id', 'subscription_type', 'amount_paid', 'duration', 'issue_date', 'expiry_date', 'document', 'providers', 'users']
+        fields = ['id', 'subscription_type', 'amount_paid', 'duration', 'issue_date', 'expiry_date', 'document', 'status', 'providers', 'users']
 
 
     def update(self, instance, validated_data):
@@ -45,21 +43,24 @@ class SubscriptionSerializer(WritableNestedModelSerializer, serializers.ModelSer
         return instance
 
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserProfile
-#         fields = ['bio', 'profile_picture', 'address', 'phone_number']
+class User_ProfileSerializer(serializers.ModelSerializer):
+    user = UsersSerializer(read_only=True)
 
-#     def update(self, instance, validated_data):
-       
-#         instance.bio = validated_data.get('bio', instance.bio)
-#         instance.address = validated_data.get('address', instance.address)
-        
-#         if 'profile_picture' in validated_data:
-#             instance.profile_picture = validated_data['profile_picture']
+    class Meta:
+        model = User_Profile
+        fields = '__all__'
 
-#         instance.save()
-#         return instance
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', {})
+
+        instance.bio = validated_data.get('bio', instance.bio)
+        instance.address = validated_data.get('address', instance.address)
+
+        if 'profile_picture' in validated_data:
+            instance.profile_picture = validated_data['profile_picture']
+
+        instance.save()
+        return instance
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 const SignIn = () => {
@@ -6,18 +6,33 @@ const SignIn = () => {
     username: "",
     password: "",
   });
-
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setError("");
-
     try {
       const response = await fetch("http://127.0.0.1:8000/user/sign_in/", {
         method: "POST",

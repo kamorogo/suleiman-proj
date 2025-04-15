@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import React from "react";
 
 const SignOut = () => {
-  const navigate = useNavigate();
+  
 
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refresh_token");
@@ -21,7 +21,7 @@ const SignOut = () => {
     localStorage.removeItem("user");
     
     
-    window.location.replace("/mpage");
+    window.location.replace("/sign_in");
   };
 
   return (

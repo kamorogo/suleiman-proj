@@ -38,6 +38,23 @@ const Manage = () => {
         }
     };
 
+
+// ----STATUS---- //
+    const getStatusBadge = (status) => {
+        switch (status?.toLowerCase()) {
+            case "active":
+                return <span className="status-badge active">🟢 Active</span>;
+            case "expired":
+                return <span className="status-badge expired">🔴 Expired</span>;
+            case "decommissioned":
+                return <span className="status-badge decommissioned">⚪ Decommissioned</span>;
+            default:
+                return <span className="status-badge default">{status}</span>;
+        }
+    };
+
+
+
 // ----EDIT---- //
     const handleEdit = async (e) => {
         e.preventDefault();
@@ -116,6 +133,7 @@ const Manage = () => {
         }
     };
 
+    window.history.replaceState(null, null, '/providers');
 
 
     return (
@@ -139,17 +157,19 @@ const Manage = () => {
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                 {filteredLicenses.map((license, index) => (
                         <tr key={license.id}>
                             <td>{index + 1}</td>
-                            <td>{license.users ? license.users.name : 'N/A'}</td>
+                            <td>{license.users ? `${license.users.first_name} ${license.users.last_name}`  : 'N/A'}</td>
                             <td>{license.users ? license.users.email : 'N/A'}</td>
                             <td>{license.subscription_type}</td>
                             <td>{license.providers}</td>
                             <td>{license.duration} months</td>
+                            <td>{getStatusBadge(license.status)}</td>
                             <td className="action-buttons">
                                 <button onClick={() => openEditModal(license)} className="edit-button">EDIT</button>
                                 <Link to={`/view-details/${license.id}`} className="view-button">VIEW</Link>
@@ -377,7 +397,42 @@ const Manage = () => {
                     margin: 0 auto;
                     gap: 5px;
                 }
-                @media (max-width: 768px) {
+                .status-badge {
+                    display: inline-block;
+                   
+                    font-size: 0.6rem;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    text-align: center;
+                    min-width: 80px;
+                }
+
+                .status-badge.active {
+                    background-color: #e0f7e9;
+                    color: #1b5e20;
+                    border: 1px solid #1b5e20;
+                }
+
+                .status-badge.expired {
+                    background-color: #ffebee;
+                    color: #c62828;
+                    border: 1px solid #c62828;
+                }
+
+                .status-badge.decommissioned {
+                    background-color: #f5f5f5;
+                    color: #616161;
+                    border: 1px solid #616161;
+                }
+
+                .status-badge.default {
+                    background-color: #eeeeee;
+                    color: #333;
+                    border: 1px solid #aaa;
+                }
+
+                
+                    @media (max-width: 768px) {
                     .LOWER {
                         flex-direction: column;
                         align-items: center;

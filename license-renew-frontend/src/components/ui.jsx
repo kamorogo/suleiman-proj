@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 
 /** Button Component */
 export function Button({ children, className = "", variant = "default", ...props }) {
@@ -60,3 +61,26 @@ export function Table({ headers = [], data = [], className = "" }) {
     </div>
   );
 }
+
+// --CARD-- //
+export const Card = ({ children, className = "", ...props }) => {
+  return (
+    <div
+      className={clsx(
+        "bg-white rounded-2xl shadow-md border border-gray-200 p-4",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+export const CardContent = ({ children, className = "", ...props }) => {
+  return (
+    <div className={clsx("p-2", className)} {...props}>
+      {children}
+    </div>
+  );
+};

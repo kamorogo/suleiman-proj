@@ -19,7 +19,8 @@ export default function Providers() {
 
   const handleNext = () => {
     if (!selectedProvider) {
-      alert("Please select a provider!");
+      alert("Please create subscription!");
+      navigate("/create");
       return;
     }
     navigate(`/manage?provider=${encodeURIComponent(selectedProvider)}`);

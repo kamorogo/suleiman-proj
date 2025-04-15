@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const LicenseList = () => {
   const [licenses, setLicenses] = useState([]);
@@ -33,14 +34,12 @@ const LicenseList = () => {
               <tr key={index}   style={{
                 backgroundColor: index % 1 === 0 ? 'white' : 'lightgray',}}>
                 <td style={styles.td}>{index + 1}</td>
-                <td style={styles.td}>{license.owner}</td>
+                <td style={styles.td}>{license.users?.first_name} {license.users?.last_name}</td>
                 <td style={styles.td}>{license.providers}</td>
                 <td style={styles.td}>{license.expiry_date}</td>
                 <td style={styles.td}>{license.subscription_type}</td>
                 <td style={styles.td}>
-                  <button onClick={() => handleView(license.id)} style={styles.viewButton}>
-                    View
-                  </button>
+                  <Link to={`/view-details/${license.id}`} className="view-button">VIEW</Link>
                 </td>
               </tr>
             ))}

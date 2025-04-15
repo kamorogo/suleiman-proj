@@ -13,11 +13,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
 # Application definition
-
 INSTALLED_APPS = [
-    # 'users.apps.UsersConfig',
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -50,19 +47,14 @@ MIDDLEWARE = [
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_HTTPONLY = False
 
-
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = False
-
-
-
 
 ROOT_URLCONF = 'LicenseRenew.urls'
 
@@ -84,6 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LicenseRenew.wsgi.application'
 
+ASGI_APPLICATION = 'LicenseRenew.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -91,14 +84,13 @@ WSGI_APPLICATION = 'LicenseRenew.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'subscriptionsDB',
+        'NAME': 'SubscriptionsDB',
         'USER': 'AdminS',
         'PASSWORD': '2025',
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -117,7 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -141,9 +132,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 AUTH_USER_MODEL = "LicenseTrack.Users"
-
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
@@ -163,7 +152,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -181,28 +170,20 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 }
 
-
 ##MEDIA ROOTS DEFINED
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-
 LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 
-
 ##CELERY SETUP
 CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-
-
-
-CELERY_RESULT_BACKEND = 'redis://@localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
-
-
 
 # Initialize environment variables
 env = environ.Env()
@@ -218,15 +199,11 @@ DEFAULT_FROM_EMAIL = 'alisuleimann4@gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL: False
 
-
-
-
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
 }
-
 
 CHANNEL_LAYERS = {
     'default': {
@@ -237,4 +214,4 @@ CHANNEL_LAYERS = {
     },
 }
 
-ASGI_APPLICATION = 'LicenseRenew.asgi.application'
+

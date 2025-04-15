@@ -5,32 +5,51 @@ const ViewProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
+    surname: '',
     phone_number: '',
     bio: '',
+    address_line1: '',
+    address_line2: '',
+    postcode: '',
+    state: '',
+    area: '',
+    email: '',
+    education: '',
+    country: '',
+    region: '',
+    experience: '',
+    additional_details: '',
     profile_picture: null,
   });
 
   useEffect(() => {
-    axios.get('/api/profile/')
-      .then(response => {
-        setProfile(response.data);
-        setFormData({
-          name: response.data.name,
-          phone_number: response.data.phone_number || '',
-          bio: response.data.bio || '',
-          profile_picture: null,  
-        });
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching profile:', error);
-        setLoading(false);
-      });
-  }, []);
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
 
-  const handleEditToggle = () => setEditing(!editing);
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/profile/', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setProfile(response.data);
+        setFormData(prev => ({
+          ...prev,
+          ...response.data,
+        }));
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -38,120 +57,223 @@ const ViewProfile = () => {
   };
 
   const handleFileChange = e => {
-    const file = e.target.files[0];
-    setFormData(prev => ({ ...prev, profile_picture: file }));
+    setFormData(prev => ({ ...prev, profile_picture: e.target.files[0] }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
     const formDataToSend = new FormData();
-    formDataToSend.append('name', formData.name);
-    formDataToSend.append('phone_number', formData.phone_number);
-    formDataToSend.append('bio', formData.bio);
-    if (formData.profile_picture) {
-      formDataToSend.append('profile_picture', formData.profile_picture);
-    }
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null) formDataToSend.append(key, value);
+    });
 
-    axios.put('/api/profile/', formDataToSend, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-      .then(response => {
-        setProfile(response.data);
-        setEditing(false);
-      })
-      .catch(error => {
-        console.error('Error updating profile:', error);
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await axios.put('http://127.0.0.1:8000/profile/', formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      setProfile(response.data);
+      setEditing(false);
+      setMessage('Profile updated!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setMessage('Update failed.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div>Loading...</div>;
-  if (!profile) return <div>Failed to load profile</div>;
+  if (!profile) return <div>Profile not found.</div>;
+
+  const imageSrc = formData.profile_picture
+    ? URL.createObjectURL(formData.profile_picture)
+    : profile.profile_picture ||
+      'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg';
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">
-      <div className="flex flex-col items-center">
-        {editing ? (
-          <>
-            {formData.profile_picture && (
-              <img
-                src={URL.createObjectURL(formData.profile_picture)}
-                alt="Profile Preview"
-                className="w-24 h-24 rounded-full mb-4"
-              />
-            )}
-            {!formData.profile_picture && profile.profile_picture && (
-              <img
-                src={profile.profile_picture}
-                alt="Profile"
-                className="w-24 h-24 rounded-full mb-4"
-              />
+    <div className="container">
+      <div className="row">
+        {/* Left Column */}
+        <div className="left-column">
+          <div className="d-flex flex-column align-items-center text-center p-3 py-5">
+            <img className="rounded-circle" src={imageSrc} alt="profile" /><br />
+            <span className="font-weight-bold mt-3">{profile.user.username}</span>
+            {editing ? (
+              <input type="text" name="bio" value={formData.bio} onChange={handleChange} className="form-control" />
+            ) : (
+              <p className="text-black/50">{formData.bio}</p>
             )}
 
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="border p-2 w-full mb-2"
-              placeholder="Name"
-            />
-            <input
-              type="text"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleChange}
-              className="border p-2 w-full mb-2"
-              placeholder="Phone Number"
-            />
-            <textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              className="border p-2 w-full mb-2"
-              placeholder="Bio"
-            />
-            <input
-              type="file"
-              name="profile_picture"
-              onChange={handleFileChange}
-              className="border p-2 w-full mb-2"
-            />
-            <button
-              onClick={handleSave}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleEditToggle}
-              className="text-sm text-gray-500 mt-2"
-            >
-              Cancel
-            </button>
-          </>
-        ) : (
-          <>
-            <h2 className="text-xl font-semibold">{profile.name}</h2>
-            <p className="text-gray-600">{profile.email}</p>
-            <p className="text-gray-600">{profile.phone_number}</p>
-            {profile.bio && <p className="mt-4 text-gray-700">{profile.bio}</p>}
-            {profile.profile_picture && (
-              <img
-                src={profile.profile_picture}
-                alt="Profile"
-                className="w-24 h-24 rounded-full mb-4"
-              />
+            {editing && <input type="file" onChange={handleFileChange} className="mt-2" />}
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="right-column">
+          <div className="p-3 py-5">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h4>Profile Settings</h4>
+              
+            </div>
+            <div className="row mt-2">
+              <div className="col-md-6">
+                <label className="labels">First Name:  &nbsp;</label><br />
+                <input type="text" name="name" value={profile.user.first_name} onChange={handleChange} className="form-control" disabled={!editing} />
+              </div>
+              <div className="col-md-6">
+                <label className="labels">Surname:  &nbsp;</label><br />
+                <input type="text" name="surname" value={profile.user.last_name} onChange={handleChange} className="form-control" disabled={!editing} />
+              </div>
+              <div className="col-md-6">
+                <label className="labels">Middle Name:  &nbsp;</label><br />
+                <input type="text" name="surname" value={profile.user.middle_name} onChange={handleChange} className="form-control" disabled={!editing} />
+              </div>
+            </div>
+
+            <div className="row mt-3">
+              {[
+                ['phone_number', 'Mobile'],
+                ['email', 'Email'],
+                ['address_line1', 'Address 1'],
+                ['address_line2', 'Address 2'],
+                ['postcode', 'Postcode'],
+                ['state', 'State'],
+              ].map(([field, label]) => (
+                <div className="col-md-12" key={field}>
+                  <label className="labels">{label}: &nbsp;</label><br />
+                  <input
+                    type="text"
+                    name={field}
+                    value={profile.user[field]}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder={label.toLowerCase()}
+                    disabled={!editing}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="row mt-3">
+              <div className="col-md-6">
+                <label className="labels">Country:  &nbsp;</label><br />
+                <input type="text" name="country" value={formData.country} onChange={handleChange} className="form-control" disabled={!editing} />
+              </div>
+              <div className="col-md-6">
+                <label className="labels">Region: &nbsp;</label><br />
+                <input type="text" name="region" value={formData.region} onChange={handleChange} className="form-control" disabled={!editing} />
+              </div>
+            </div>
+
+            {editing && (
+              <div className="mt-5 text-center">
+                <button className="btn btn-primary profile-button" onClick={handleSave} disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Profile'}
+                </button>
+              </div>
             )}
-            <button
-              onClick={handleEditToggle}
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Edit
-            </button>
-          </>
-        )}
+            {message && (
+              <div className="mt-3 text-center">
+                <span className="text-success">{message}</span>
+              </div>
+            )}
+          </div>
+          <button className="edit_button" onClick={() => setEditing(!editing)}>
+                {editing ? 'Cancel' : 'Edit'}
+          </button>
+        </div>
+        
       </div>
+
+      <style jsx>{`
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+
+        .row {
+          display: flex;
+          gap: 5%;
+          flex-wrap: wrap;
+        }
+
+        .left-column {
+          width: 20%;
+          border-right: 1px solid #ddd;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+
+        .left-column img {
+          border-radius: 50%;
+          width: 150px;
+          margin-top: 20px;
+        }
+
+        .left-column .font-weight-bold {
+          font-size: 18px;
+          margin-top: 10px;
+        }
+
+        .left-column .text-black-50 {
+          color: #6c757d;
+        }
+
+        .right-column {
+          width: 70%;
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+
+        .labels {
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
+
+        input.form-control {
+          margin-bottom: 10px;
+          padding: 10px;
+          justify-content: end;
+          align-items: end;
+        }
+
+        .profile-button {
+          background-color: rgb(99, 39, 120);
+          border: none;
+          color: white;
+          padding: 10px 20px;
+          cursor: pointer;
+        }
+
+        .profile-button:hover {
+          background-color: #682773;
+        }
+
+        @media (max-width: 768px) {
+          .row {
+            flex-direction: column;
+          }
+
+          .left-column,
+          .right-column {
+            width: 100%;
+            border: none;
+            padding: 0;
+          }
+
+          .left-column {
+            margin-bottom: 20px;
+          }
+        }
+      `}</style>
     </div>
   );
 };

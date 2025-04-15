@@ -22,30 +22,25 @@ const Reports = () => {
       });
   }, []);
 
- 
   const handleDownload = (format) => {
-    const url = `http://localhost:8000/software/generate_${format}/`;  
-
+    const url = `http://localhost:8000/reports/generate/${format}/`;
+  
     fetch(url)
       .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to download report");
-        }
+        if (!response.ok) throw new Error("Failed to download report");
         return response.blob();
       })
       .then((blob) => {
         const link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob); 
-        link.download = `Software_Licenses.${format === "pdf" ? "pdf" : "xlsx"}`;
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `Subscription_Report.${format === "pdf" ? "pdf" : "xlsx"}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       })
-      .catch((error) => {
-        console.error("Download error:", error); 
-      });
+      .catch((error) => console.error("Download error:", error));
   };
-
+  
   
   if (loading) {
     return <Typography>Loading...</Typography>;

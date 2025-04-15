@@ -1,8 +1,9 @@
-#Env Import
+
 import os
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LicenseRenew.settings')
 
 import re
+from io import BytesIO
 import traceback
 import sys
 from django.conf import settings
@@ -32,8 +33,8 @@ from rest_framework.decorators import api_view, APIView, permission_classes, aut
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser, FormParser
-from .serializers import SubscriptionSerializer, SignUpSerializer, SignInSerializer
-from .models import Subscription, Providers, Users
+from .serializers import SubscriptionSerializer, SignUpSerializer, SignInSerializer, User_ProfileSerializer
+from .models import Subscription, Providers, Users, User_Profile
 from .tasks import send_software_reminder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -42,6 +43,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 from django.utils.timezone import now
+from django.utils import timezone
 import io
 from django.contrib.auth import authenticate
 from datetime import date, timedelta
@@ -72,13 +74,6 @@ def extract_text_from_pdf(pdf_file):
 def parse_license_details(text):
     """Extract structured license details from the text."""
     details = {}
-
-    # Extract Subscription Type
-    subscription_types = ["Proprietary", "Enterprise"]
-    for sub in subscription_types:
-        if sub.lower() in text.lower():
-            details["subscription_type"] = sub
-            break
 
     # Extract Service Provider
     providers = ["Microsoft", "Google", "Oracle", "Adobe"]
@@ -151,6 +146,23 @@ class CreateLicense(APIView):
         issue_date = extracted_data.get("issue_date", data.get("issue_date"))
         expiry_date = extracted_data.get("expiry_date", data.get("expiry_date"))
 
+        DURATION_TYPE_MAP = {
+            0: "Trial",
+            1: "Monthly",
+            3: "Quarterly",
+            6: "Semi-Annual",
+            12: "Annual",
+            24: "Biennial",
+            36: "Triennial",
+            48: "Quadrennial"
+        }
+
+        if not subscription_type and duration is not None:
+            try:
+                subscription_type = DURATION_TYPE_MAP.get(int(duration), f"{duration} Months")
+            except ValueError:
+                pass
+
         if not all([subscription_type, service_provider, amount_paid, duration, issue_date, expiry_date]):
             return Response({"detail": "Missing required fields"}, status=400)
 
@@ -181,7 +193,6 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 def list_software(request):
- 
     licenses = Subscription.objects.all()
     serializer = SubscriptionSerializer(licenses, many=True)
     return Response(serializer.data)
@@ -212,7 +223,7 @@ def trigger_email(request):
     try:
      print("Sending Email")
      send_software_reminder.delay()
-     print("Enail Sent")
+     print("Email Sent")
      return Response({"message": "Email Notification triggered!"}, status=200)
 
     except Exception as e:
@@ -294,7 +305,67 @@ class SubscriptionDataAPIView(APIView):
             "expiry_date"
         )
         return Response({"list": list(data)})
+    
 
+def generate_pdf_report(request):
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(100, 780, "Subscription Report")
+
+    subscriptions = Subscription.objects.all()
+    y = 740
+    p.setFont("Helvetica", 10)
+    for sub in subscriptions[:40]:
+        line = f"{sub.providers.service_provider if sub.providers else 'N/A'} | " \
+               f"{sub.subscription_type if sub.subscription_type else 'N/A'} | " \
+               f"Kshs.{sub.amount_paid} | {sub.issue_date} - {sub.expiry_date} | {sub.status}"
+        p.drawString(60, y, line)
+        y -= 15
+        if y < 60:
+            p.showPage()
+            y = 750
+
+    p.save()
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename="subscription_report.pdf")
+
+def generate_excel_report(request):
+
+    subscriptions = Subscription.objects.select_related("providers", "subscription_type").all()
+
+    data = []
+    for sub in subscriptions:
+        data.append({
+            "Provider": sub.providers.service_provider if sub.providers else "N/A",
+            "Subscription Type": sub.subscription_type if sub.subscription_type else "N/A",
+            "Amount Paid (Kshs)": sub.amount_paid,
+            "Issue Date": sub.issue_date.strftime("%Y-%m-%d") if sub.issue_date else "N/A",
+            "Expiry Date": sub.expiry_date.strftime("%Y-%m-%d") if sub.expiry_date else "N/A",
+            "Status": sub.status,
+        })
+
+    df = pd.DataFrame(data)
+
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Subscriptions")
+        worksheet = writer.sheets["Subscriptions"]
+        for i, col in enumerate(df.columns):
+            column_width = max(df[col].astype(str).map(len).max(), len(col)) + 2
+            worksheet.set_column(i, i, column_width)
+
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename="subscription_report.xlsx")
+    
+def generate_report(request, format):
+    if format == 'pdf':
+        return generate_pdf_report(request)
+    elif format == 'excel':
+        return generate_excel_report(request)
+    else:
+        return HttpResponseBadRequest("Unsupported format")
 
 
 # ----USER MANAGEMENT---- #
@@ -304,7 +375,7 @@ class SignUpView(APIView):
             data = json.loads(request.body.decode('utf-8'))
             print("Received Data:", data) 
            
-            required_fields = ["username", "password", "name", "email"]
+            required_fields = ["username", "password", "first_name", "middle_name", "last_name", "email"]
             for field in required_fields:
                 if field not in data or not data[field]:
                     return JsonResponse({"error": f"{field} is required"}, status=400)
@@ -312,7 +383,9 @@ class SignUpView(APIView):
 
             user = Users(
                 username=data["username"],
-                name=data["name"],
+                first_name=data["first_name"],
+                middle_name=data.get("middle_name", ""), 
+                last_name=data["last_name"],
                 phone_number=data.get("phone_number"),
                 email=data["email"]
             )
@@ -331,8 +404,6 @@ class SignUpView(APIView):
             print(f"Error: {str(e)}")
             return JsonResponse({"error": str(e)}, status=500)
        
-
-
 class SignInView(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -375,8 +446,6 @@ class SignOutView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
-
-
 # ----LOGGED USER---- #
 class LoggedUser(APIView):
     permission_classes = [IsAuthenticated]
@@ -388,32 +457,59 @@ class LoggedUser(APIView):
             "email": user.email,
         })
 
+# ----SUBCSRIPTION STATUS---- #
+def subscription_status(request, id):
+
+    subscription = Subscription.objects.get(id=id)
+
+    current_date = timezone.now().date()
+
+    if subscription.expiry_date < current_date:
+        subscription.status = 'active'
+
+    elif subscription.transitioning_to_another_provider:
+        subscription.status = 'decommissioned'
+
+    else:
+        subscription.status = 'active'
+
+    
+    subscription.save()
+
+    return render(request, 'subscription_status.html', {'subscription': subscription})
+
 
 # ----USER PROFILE---- #
-# class UserProfileView(APIView):
-#     permission_classes = [IsAuthenticated]
+class UserProfileView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+   
 
-#     def get(self, request):
+    def get(self, request):
+        print("Authorization Header:", request.headers.get('Authorization'))
+        print("User:", request.user)
+        print("Is Authenticated:", request.user.is_authenticated)
+        
+        if not request.user.is_authenticated:
+            return Response({"detail": "Not authenticated"}, status=403)
+
+        try:
+            profile, created = User_Profile.objects.get_or_create( user=request.user)
+            print("Matched Profile:", request.user)
+        except Exception as e:
+            print("Profile fetch error:", e)
+            return Response({"detail": str(e)}, status=404)
+
+        serializer = User_ProfileSerializer(profile)
+        return Response(serializer.data, status=200)
+
+    def put(self, request):
+        profile = get_object_or_404(User_Profile, user=request.user)
+        serializer = User_ProfileSerializer(profile, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
        
-#         try:
-#             profile = UserProfile.objects.get(user=request.user)
-#         except UserProfile.DoesNotExist:
-#             return Response({"detail": "Profile not found"}, status=404)
-
-#         serializer = UserProfileSerializer(profile)
-#         return Response(serializer.data)
-
-#     def put(self, request):
-       
-#         try:
-#             profile = UserProfile.objects.get(user=request.user)
-#         except UserProfile.DoesNotExist:
-#             return Response({"detail": "Profile not found"}, status=404)
-
-#         serializer = UserProfileSerializer(profile, data=request.data, partial=True)
-
-#         if serializer.is_valid():
-#             updated_profile = serializer.save()
-#             return Response(UserProfileSerializer(updated_profile).data)
-
-#         return Response(serializer.errors, status=400)

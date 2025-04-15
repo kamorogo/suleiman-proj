@@ -1,9 +1,37 @@
-import React from 'react'
-import './Dashboard.css'
+import { useState, useEffect } from 'react';
+import './Dashboard.css';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 
-
 const Dashboard = () => {
+  const [licenseData, setLicenseData] = useState(null);
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!token) {
+        console.error('No token found!');
+        return;
+      }
+
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/profile/', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        setLicenseData(response.data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [token]);
+
+
+
   return (
     <div className='MainPage'>
         {/* -SECTION 1- */}
@@ -36,22 +64,20 @@ const Dashboard = () => {
                         <label for="profile-toggle" class="close-btn">&times;</label>
                         <div className="license-profile-image">
 
-                            <h1>User Profile</h1>
-                    
-                        {/* <img 
-                            src={licenseData.profile_picture 
-                                ? `http://127.0.0.1:8000${licenseData.profile_picture}` 
-                                : "/user.png"
-                            } 
-                            alt="" 
-                            className="profile-image-img"
-                        />
-                    
-                    <p className="username">{licenseData.users?.name}</p> */}
-                </div>
+                            {licenseData && (
+                            <>
+                                <img
+                                src={licenseData.profile_picture || 'user.png'}
+                                alt="Profile"
+                                className="w-12 h-12 rounded-full"
+                                />
+                                <h2 className="text-lg font-medium ">{licenseData.user?.first_name} {licenseData.user?.last_name}</h2>
+                            </>
+                            )}  
+                        </div>
                     
                         <button class="action-Btn"><Link to="/vprofile">View Profile</Link></button>
-                        <button class="action-Btn"><Link to="/mpage">Sign Out</Link></button>
+                        <button class="action-Btn"><Link to="/sign_in">Sign Out</Link></button>
                     </div>
                 </div>
             </headeR>
@@ -143,7 +169,7 @@ const Dashboard = () => {
                 </div>
                 <div className='pg4-col3'>
                     <div className='pg4-dp'>
-                            <Link to="/renew" >
+                            <Link to="/renewals" >
                                 <div className='above'>
                                     <img src='/renewB.png' alt='' />
                                     <h4>Renewing</h4>
@@ -242,8 +268,8 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className='client-image'>
-                    <img src='/safaricom.png' className='client-logo' alt='Safaricom' />
-                    <img src='/meta.png' className='client-logo' alt='Meta' />
+                    <img src='/Safaricom.png' className='client-logo' alt='Safaricom' />
+                    <img src='/Meta.png' className='client-logo' alt='Meta' />
                     <img src='/Amazon.png' className='client-logo' alt='Amazon' />
                     <img src='/Google.png' className='client-logo' alt='Google' />
                     <img src='/Microsoft.png' className='client-logo' alt='Microsoft' />
@@ -329,7 +355,7 @@ const Dashboard = () => {
                             </ul>
                         </div>
                  </div>
-                    <p >ABC Bank Group © Copyright rights reserved</p>
+                    <p >ABC Bank Group &copy; Copyright rights reserved</p>
                 </div>
            </div>
         </footer>

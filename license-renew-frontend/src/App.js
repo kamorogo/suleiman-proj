@@ -18,6 +18,7 @@ import ViewProfile from "./components/ViewProfile.jsx";
 import ViewDetails from "./components/ViewDetails.jsx";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import Renewals from "./pages/Renewals.jsx";
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
                 <Route path="/manage" element={<Manage />} />
                 <Route path="/licenses" element={<Licenses />} />
                 <Route path="/viewlicense" element={<LicenseList />} />
+                <Route path="/renewals" element={<Renewals />} />
                 <Route path="/renew" element={<Renew />} />
                 <Route path="/create" element={<Create />} />
                 <Route path="/help" element={<Help />} />

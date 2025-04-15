@@ -89,15 +89,15 @@ const ViewDetails = () => {
                     <p className="username">{licenseData.users?.username}</p>
                 </div>
                 <div className="license-details">
-                    <p><strong>Name:</strong> {licenseData.users?.name}</p>
+                    <p><strong>Name:</strong> {licenseData.users?.first_name} {licenseData.users?.last_name}</p>
                     <p><strong>Email:</strong> {licenseData.users?.email}</p>
                     <p><strong>Phone Number:</strong> {licenseData.users?.phone_number}</p>
                     <p><strong>Provider:</strong> {licenseData.providers}</p>
-                    <p><strong>Subscription Type:</strong> {licenseData.subscription_type}</p>
                     <p><strong>Amount Paid:</strong> {licenseData.amount_paid}</p>
-                    <p><strong>Duration:</strong> {licenseData.duration} (Months)</p>
                     <p><strong>Issue Date:</strong> {licenseData.issue_date}</p>
                     <p><strong>Expiry Date:</strong> {licenseData.expiry_date}</p>
+                    <p><strong>Duration:</strong> {licenseData.duration} (Months)</p>
+                    <p><strong>Subscription Type:</strong> {licenseData.subscription_type}</p>
                     <p><strong>Document:</strong> {licenseData.document ? (
                             <a 
                                 href={`http://127.0.0.1:8000${licenseData.document}`} 
