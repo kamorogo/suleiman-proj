@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "../components/ui.jsx";
-import { CheckCircle, Clock } from "lucide-react";
-import { motion } from "framer-motion";
 import axios from "axios";
 
 const Renewal = () => {
@@ -46,6 +43,11 @@ const Renewal = () => {
   };
   
 
+  const getInitialsAvatar = (firstName, lastName) => {
+    const initials = `${firstName ? firstName[0] : ''}${lastName ? lastName[0] : ''}`.toUpperCase();
+    return `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff&size=128`;
+  };
+
   return (
     <div class="bodyrenewals">
        
@@ -53,9 +55,9 @@ const Renewal = () => {
         {licenseData && (
             <>
             <img 
-                src={licenseData.profile_picture || 'user.png'}
-                alt="Profile"
-                className="Profile"
+                 src={licenseData.profile_picture || getInitialsAvatar(licenseData.user?.first_name, licenseData.user?.last_name)}
+                 alt="Profile"
+                 className="profile-avatar"
             />
             <div class="cardHcontent">
             <div class="user-name">{licenseData.user?.first_name} {licenseData.user?.last_name}</div>
@@ -113,6 +115,12 @@ const Renewal = () => {
                 display: flex;
                 flex-direction: column;
                 margin-left: 1rem;
+                }
+                  .profile-avatar {
+                  width: 48px;
+                  height: 48px;
+                  border-radius: 50%;
+                  object-fit: cover; 
                 }
 
                 .Profile {

@@ -35,7 +35,7 @@ export default function Providers() {
         </div>
         <div className="nav-links">
           <a href="/help" className="help">Help</a>
-          <a href="/mpage" className="logout">Logout</a>
+          <a href="/sign_in" className="logout">Logout</a>
         </div>
       </header>
 

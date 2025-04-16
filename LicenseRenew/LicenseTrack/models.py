@@ -8,6 +8,10 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.conf import settings
+from django.core.files.base import ContentFile
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+import io
 
 
 class Users(AbstractUser):
@@ -37,7 +41,7 @@ class Users(AbstractUser):
 class User_Profile(models.Model):
     user = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='avatars/', blank=True, null=True)
     address_line1 = models.CharField(max_length=255, blank=True, null=True)
     address_line2 = models.CharField(max_length=255, blank=True, null=True)
     postcode = models.CharField(max_length=20, blank=True, null=True)
@@ -47,7 +51,28 @@ class User_Profile(models.Model):
 
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
-   
+    
+    def generate_initials_avatar(self):
+        name = f"{self.user.first_name} {self.user.last_name}".strip()
+        initials = ''.join([word[0].upper() for word in name.split() if word])
+
+        image = Image.new("RGB", (150, 150), color=(255, 255, 255))
+        draw = ImageDraw.Draw(image)
+        font = ImageFont.load_default()
+
+        bbox = draw.textbbox((0, 0), initials, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        position = ((150 - text_width) / 2, (150 - text_height) / 2)
+
+        draw.text(position, initials, fill=(0, 0, 0), font=font)
+
+        buffer = io.BytesIO()
+        image.save(buffer, format='PNG')
+        file_name = f'{self.user.username}_avatar.png'
+        self.profile_picture.save(file_name, ContentFile(buffer.getvalue()), save=False)
+    
+
     
 class Providers(models.Model):
     service_provider = models.CharField(max_length=255)

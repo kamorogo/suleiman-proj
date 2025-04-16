@@ -30,6 +30,10 @@ const Dashboard = () => {
     fetchUserData();
   }, [token]);
 
+  const getInitialsAvatar = (firstName, lastName) => {
+    const initials = `${firstName ? firstName[0] : ''}${lastName ? lastName[0] : ''}`.toUpperCase();
+    return `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff&size=128`;
+  };
 
 
   return (
@@ -47,8 +51,16 @@ const Dashboard = () => {
                         <li><a href="/services">Services</a></li>
                         <li class="user-profile">
                             <label for="profile-toggle" class="user-profile">
-                                <img src="user.png" alt="User Icon" class="profile-icon" />
-                                <span><i class="fa-solid fa-caret-down"></i></span>
+                            {licenseData && (
+                                <>
+                                    <img
+                                        src={licenseData.profile_picture || getInitialsAvatar(licenseData.user?.first_name, licenseData.user?.last_name)}
+                                        alt="Profile"
+                                        className="w-12 h-12 rounded-full"
+                                    />
+                                    <span><i class="fa-solid fa-caret-down"></i></span>
+                                </>
+                            )}
                             </label>
                         </li>
                         <a>
@@ -67,9 +79,9 @@ const Dashboard = () => {
                             {licenseData && (
                             <>
                                 <img
-                                src={licenseData.profile_picture || 'user.png'}
-                                alt="Profile"
-                                className="w-12 h-12 rounded-full"
+                                    src={licenseData.profile_picture || getInitialsAvatar(licenseData.user?.first_name, licenseData.user?.last_name)}
+                                    alt="Profile"
+                                    className="w-12 h-12 rounded-full"
                                 />
                                 <h2 className="text-lg font-medium ">{licenseData.user?.first_name} {licenseData.user?.last_name}</h2>
                             </>

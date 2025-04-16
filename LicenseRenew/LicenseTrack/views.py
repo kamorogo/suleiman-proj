@@ -29,7 +29,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, Http
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
-from rest_framework.decorators import api_view, APIView, permission_classes, authentication_classes
+from rest_framework.decorators import api_view, APIView, parser_classes, authentication_classes
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -494,7 +494,7 @@ class UserProfileView(APIView):
             return Response({"detail": "Not authenticated"}, status=403)
 
         try:
-            profile, created = User_Profile.objects.get_or_create( user=request.user)
+            profile, created = User_Profile.objects.get_or_create(user=request.user)
             print("Matched Profile:", request.user)
         except Exception as e:
             print("Profile fetch error:", e)
@@ -509,7 +509,49 @@ class UserProfileView(APIView):
         
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            user_data = request.data.get('user')
+            if user_data:
+                updated = False
+                if 'first_name' in user_data:
+                    request.user.first_name = user_data['first_name']
+                    updated = True
+                if 'last_name' in user_data:
+                    request.user.last_name = user_data['last_name']
+                    updated = True
+                if updated:
+                    request.user.save()
+                    profile.generate_initials_avatar()
+                    profile.save()
+
+            return Response(serializer.data, status=200)
+
+        return Response(serializer.errors, status=400)
+           
        
+
+
+# ----RENEW---- #
+@api_view(['POST'])
+@parser_classes([MultiPartParser])
+def renew_subscription(request, id):
+    license = Subscription.objects.get(id=id)
+
+    new_expiry = request.data.get('new_expiry_date')
+    subscription_type = request.data.get('subscription_type')
+    provider = request.data.get('provider')
+    notes = request.data.get('notes')
+    renewal_document = request.FILES.get('renewal_document')
+
+    try:
+        license.expiry_date = new_expiry
+        license.status = 'active'
+        license.subscription_type = subscription_type
+        license.provider = provider
+        license.notes = notes
+        if renewal_document:
+            license.renewal_document = renewal_document  
+        license.save()
+        return Response({"message": "License renewed."})
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

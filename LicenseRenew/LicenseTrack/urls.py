@@ -2,7 +2,7 @@ from django.urls import path
 from django.urls import path, include
 from django.contrib.auth.views import LoginView 
 from rest_framework.routers import DefaultRouter
-from .views import extract_text, CreateLicense, generate_report, trigger_email, list_software, get_software, delete_software, LicenseUpdateView, download_subscription
+from .views import extract_text, CreateLicense, generate_report, renew_subscription, trigger_email, list_software, get_software, delete_software, LicenseUpdateView, download_subscription
 from .views import SubscriptionReportAPIView, SubscriptionDataAPIView, SubscriptionTypeReportAPIView, ProvidersListAPIView, SignUpView, SignInView, SignOutView, LoggedUser, UserProfileView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -40,4 +40,6 @@ urlpatterns = [
     path('user/loggeduser/', LoggedUser.as_view(), name='api_sign_out'),
 
     path('profile/', UserProfileView.as_view(), name='user_profile'),
+
+    path('renew/', renew_subscription,)
 ]

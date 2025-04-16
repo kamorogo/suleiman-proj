@@ -20,7 +20,6 @@ const ViewProfile = () => {
     email: '',
     country: '',
     region: '',
-    profile_picture: null,
   });
 
   useEffect(() => {
@@ -53,27 +52,24 @@ const ViewProfile = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = e => {
-    setFormData(prev => ({ ...prev, profile_picture: e.target.files[0] }));
-  };
-
   const handleSave = async () => {
     setSaving(true);
-    const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value !== null) formDataToSend.append(key, value);
-    });
 
     const token = localStorage.getItem('token');
     if (!token) return;
 
     try {
-      const response = await axios.put('http://127.0.0.1:8000/profile/', formDataToSend, {
+        await axios.put('http://127.0.0.1:8000/profile/', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setProfile(response.data);
+      const updatedProfile = await axios.get('http://127.0.0.1:8000/profile/', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setProfile(updatedProfile.data);
+      setFormData(prev => ({ ...prev, ...updatedProfile.data }));
       setEditing(false);
       setMessage('Profile updated!');
     } catch (error) {
@@ -87,13 +83,14 @@ const ViewProfile = () => {
   if (loading) return <div>Loading...</div>;
   if (!profile) return <div>Profile not found.</div>;
 
-  const imageSrc =
-  formData.profile_picture instanceof File
-    ? URL.createObjectURL(formData.profile_picture)
-    : formData.profile_picture ||
-      profile.profile_picture ||
-      'https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg';
-
+  const user = profile.user || {};
+  const imageSrc = profile.profile_picture
+    ? `${profile.profile_picture}?t=${new Date().getTime()}`
+    : 'https://ui-avatars.com/api/?name=' +
+      encodeURIComponent(`${user.first_name || ''} ${user.last_name || ''}`) +
+      '&background=random&color=fff&size=128';
+  
+      
   return (
     <div className="container">
       <div className="row">
@@ -107,8 +104,6 @@ const ViewProfile = () => {
             ) : (
               <p className="text-black/50">{formData.bio}</p>
             )}
-
-            {editing && <input type="file" onChange={handleFileChange} className="mt-2" />}
           </div>
         </div>
 

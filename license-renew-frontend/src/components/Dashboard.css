@@ -39,16 +39,17 @@ margin-right: 40%;
 .user-profile {
 display: flex;
 align-items: center;
+gap: 0.5rem;
 cursor: pointer;
-gap: 5px;
 }
-.profile-icon {
-width: 24px;
-height: 24px;
-border-radius: 50%;
-object-fit: cover;
-margin-right: 5px;
+
+.user-profile img {
+width: 30px;
+height: 30px;
+border-radius: 50%;    
+object-fit: cover;        
 }
+  
 .modal-overlay {
 position: fixed;
 top: 60px;
