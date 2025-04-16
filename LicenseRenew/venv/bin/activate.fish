@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /home/sali/License_Renew_Track_System/LicenseRenew/venv
+set -gx VIRTUAL_ENV /home/sali/Documents/License_Renew_Track_System/LicenseRenew/venv
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
