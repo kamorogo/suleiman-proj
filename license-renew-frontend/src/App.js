@@ -46,7 +46,7 @@ function App() {
                 <Route path="/licenses" element={<Licenses />} />
                 <Route path="/viewlicense" element={<LicenseList />} />
                 <Route path="/renewals" element={<Renewals />} />
-                <Route path="/renew" element={<Renew />} />
+                <Route path="/renew/:id" element={<Renew />} />
                 <Route path="/create" element={<Create />} />
                 <Route path="/help" element={<Help />} />
             </Route>

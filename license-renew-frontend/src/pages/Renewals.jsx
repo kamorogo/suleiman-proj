@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Renewal = () => {
     const [licenseData, setLicenseData] = useState(null);
     const token = localStorage.getItem('token');
     const [licenses, setLicenses] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("active");
+    const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -43,6 +46,12 @@ const Renewal = () => {
   };
   
 
+  const filteredLicenses =
+  statusFilter === "all"
+    ? licenses
+    : licenses.filter((license) => license.status === statusFilter);
+
+
   const getInitialsAvatar = (firstName, lastName) => {
     const initials = `${firstName ? firstName[0] : ''}${lastName ? lastName[0] : ''}`.toUpperCase();
     return `https://ui-avatars.com/api/?name=${initials}&background=random&color=fff&size=128`;
@@ -67,11 +76,29 @@ const Renewal = () => {
         )}
         </div>
 
-     
-        <div class="midheader">
-            <button class="button active">Active</button>
-            <button class="button">Expired</button>
+        
+        <div className="midheader">
+          <button
+            className={`button ${statusFilter === "active" ? "active" : ""}`}
+            onClick={() => setStatusFilter("active")}
+          >
+            Active
+          </button>
+          <button
+            className={`button ${statusFilter === "expired" ? "active" : ""}`}
+            onClick={() => setStatusFilter("expired")}
+          >
+            Expired
+          </button>
+         
+          <button
+            className={`button ${statusFilter === "all" ? "active" : ""}`}
+            onClick={() => setStatusFilter("all")}
+          >
+            All
+          </button>
         </div>
+
 
         
         <div class="renewalsmain">
@@ -80,13 +107,46 @@ const Renewal = () => {
             <span class="show-all">Show All</span>
             </div>
 
-            {licenses.map((license, index) => (
-            <div class="subscription-box" key={license.id}>
-                <img src="subscription-icon.jpg" alt="Subscription Icon" class="subscription-icon"/>
-                <div class="subscription-name">{license.providers} subscription</div>
-                <div class="subscription-price">Ksh {license.amount_paid}</div>
+           
+        {filteredLicenses.map((license) => {
+          const providerName = license.providers.toLowerCase();
+          const imagePath = `/${providerName}.png`; 
+
+          const issueDate = new Date(license.issue_date).toLocaleDateString();
+          const expiryDate = new Date(license.expiry_date).toLocaleDateString();
+
+  
+          const statusClass = {
+            active: "status-btn active",
+            expired: "status-btn expired",
+            decommissioned: "status-btn decommissioned"
+          }[license.status] || "status-btn";
+
+          return (
+            <div 
+              className="subscription-box" 
+              key={license.id}
+              onClick={() => navigate(`/renew/${license.id}`)}
+              style={{ cursor: "pointer" }}
+            >
+              <img
+                src={imagePath}
+                alt={`${license.providers}`}
+                className="subscription-icon"
+                onError={(e) => (e.target.src = "/default.jpg")}
+              />
+             
+    
+              <div className="subscription-name">{license.providers} subscription</div>
+              <div className="subscription-dates">
+                <span> &nbsp; &nbsp; Issued <br/><br/>{issueDate}</span>
+                <span></span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<span>&nbsp; &nbsp;Expires <br/><br/> {expiryDate}</span>
+              </div>
+              <button className={statusClass}>{license.status}</button>
+              <div className="subscription-price">Ksh {license.amount_paid}</div>
             </div>
-            ))}
+          );
+        })}
         </div>
 
 
@@ -95,7 +155,7 @@ const Renewal = () => {
             {
                 `
                 .bodyrenewals {
-                padding: 1rem;
+                padding: 10px 200px;
                 background-color: #f9fafb;
                 }
 
@@ -201,7 +261,9 @@ const Renewal = () => {
                 }
 
                 .subscription-box:hover {
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+                transform: scale(1.01);
+                transition: all 0.2s ease;
                 }
 
                 .subscription-icon {
@@ -215,7 +277,38 @@ const Renewal = () => {
                 font-weight: 500;
                 flex: 1;
                 }
+                .subscription-dates {
+                  flex: 1;
+                  display: flex;
+                  flex-direction: row;
+                  font-size: 0.8rem;
+                  color: #6b7280;
+                  gap: 30px;
+                }
+                  .status-btn {
+                  padding: 0.3rem 0.6rem;
+                  border-radius: 0.375rem;
+                  font-size: 0.75rem;
+                  font-weight: 500;
+                  text-transform: capitalize;
+                  border: none;
+                  cursor: default;
+                }
 
+                .status-btn.active {
+                  background-color: #10b981;
+                  color: white;
+                }
+
+                .status-btn.expired {
+                  background-color: #ef4444;
+                  color: white;
+                }
+
+                .status-btn.decommissioned {
+                  background-color: #6b7280;
+                  color: white;
+                }
                 .subscription-price {
                 font-size: 0.875rem;
                 color: #4b5563;
