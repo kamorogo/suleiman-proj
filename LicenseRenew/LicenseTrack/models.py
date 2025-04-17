@@ -41,7 +41,6 @@ class Users(AbstractUser):
 class User_Profile(models.Model):
     user = models.OneToOneField(Users, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='avatars/', blank=True, null=True)
     address_line1 = models.CharField(max_length=255, blank=True, null=True)
     address_line2 = models.CharField(max_length=255, blank=True, null=True)
     postcode = models.CharField(max_length=20, blank=True, null=True)
@@ -158,25 +157,31 @@ class Subscription(models.Model):
    
 class Renewals(models.Model):
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE, related_name='renewals')
-    renewal_date = models.DateField(default=now)
-    expiry_date = models.DateField(editable=False)
+    renewal_date = models.DateField()
+    new_expiry_date = models.DateField()
+    old_expiry_date = models.DateField(blank=True, null=True)
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    invoice_no = models.CharField(max_length=10, unique=True)
     receipt = models.FileField(upload_to='receipt/')
+    renewed_by = models.ForeignKey(Users, on_delete=models.SET_NULL, null=True, blank=True)
+    notes = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         
-        if not self.renewal_date:
-            self.renewal_date = now().date()
+        if not self.old_expiry_date and self.subscription:
+            self.old_expiry_date = self.subscription.expiry_date
         
-        subscription_duration = self.subscription.duration
+        if self.renewal_date:
+            self.subscription.issue_date = self.renewal_date
+        
+        if self.new_expiry_date:
+            self.subscription.expiry_date = self.new_expiry_date
 
-        self.expiry_date = self.renewal_date + relativedelta(months=subscription_duration)
+        if self.paid_amount is not None:
+            self.subscription.amount_paid = self.paid_amount
 
-        super().save(*args, **kwargs) 
+        self.subscription.save()
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.subscription} (Renewed on: {self.renewal_date} & Expires: {self.expiry_date} )"
-
-
-
+        return f"{self.subscription} - Renewed on {self.renewal_date}"

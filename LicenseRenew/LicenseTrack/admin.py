@@ -20,9 +20,14 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 
 class RenewalsAdmin(admin.ModelAdmin):
-    list_display = ('subscription', 'renewal_date', 'expiry_date', 'paid_amount', 'invoice_no')
-    search_fields = ('subscription__subscription_type', 'invoice_no')
-    list_filter = ('renewal_date', 'expiry_date')
+    list_display = (
+        'subscription', 'renewal_date', 'old_expiry_date', 'new_expiry_date', 'paid_amount', 'receipt', 'renewed_by'
+    )
+    search_fields = (
+        'subscription__users__username', 'subscription__providers__service_provider', 'renewed_by__username'
+    )
+    list_filter = ('renewal_date', 'renewed_by')
+    date_hierarchy = 'renewal_date'
 
 
 admin.site.register(Users, UsersAdmin)

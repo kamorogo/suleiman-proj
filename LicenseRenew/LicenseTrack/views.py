@@ -17,6 +17,7 @@ from rest_framework.exceptions import AuthenticationFailed
 import pytesseract
 from PIL import Image
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 from fuzzywuzzy import fuzz
 from dateutil import parser
 from docx import Document
@@ -406,12 +407,21 @@ class SignUpView(APIView):
        
 class SignInView(APIView):
     def post(self, request):
-        username = request.data.get('username')
+        username_or_email = request.data.get('username')
         password = request.data.get('password')
 
-        print(f"Attempting to authenticate user: {username}")
+        print(f"Attempting to authenticate user: {username_or_email}")
+
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
         try:
-            user = Users.objects.get(username=username)
+            if re.match(email_pattern, username_or_email):
+                
+                user = get_user_model().objects.get(email=username_or_email)
+            else:
+               
+                user = get_user_model().objects.get(username=username_or_email)
+            
             print(f"User found: {user}")
 
             if user.check_password(password):
@@ -426,7 +436,7 @@ class SignInView(APIView):
                 print("Password is incorrect")
                 raise AuthenticationFailed('Invalid credentials')
         except Users.DoesNotExist:
-            print(f"User with username {username} does not exist")
+            print(f"User with username {username_or_email} does not exist")
             raise AuthenticationFailed('User does not exist')
         
 

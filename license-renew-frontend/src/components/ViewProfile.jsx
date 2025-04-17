@@ -8,8 +8,9 @@ const ViewProfile = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
-    name: '',
-    surname: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
     phone_number: '',
     bio: '',
     address_line1: '',
@@ -35,7 +36,18 @@ const ViewProfile = () => {
         setProfile(response.data);
         setFormData(prev => ({
           ...prev,
-          ...response.data,
+          first_name: response.data.user.first_name || '',
+          middle_name: response.data.user.middle_name || '',
+          last_name: response.data.user.last_name || '',
+          phone_number: response.data.user.phone_number || '',
+          bio: response.data.bio || '',
+          address_line1: response.data.address_line1 || '',
+          address_line2: response.data.address_line2 || '',
+          postcode: response.data.postcode || '',
+          state: response.data.state || '',
+          email: response.data.user.email || '',
+          country: response.data.country || '',
+          region: response.data.region || '',
         }));
       } catch (error) {
         console.error('Error fetching profile:', error);
@@ -59,7 +71,7 @@ const ViewProfile = () => {
     if (!token) return;
 
     try {
-        await axios.put('http://127.0.0.1:8000/profile/', formData, {
+      await axios.put('http://127.0.0.1:8000/profile/', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -69,7 +81,21 @@ const ViewProfile = () => {
       });
 
       setProfile(updatedProfile.data);
-      setFormData(prev => ({ ...prev, ...updatedProfile.data }));
+      setFormData(prev => ({
+        ...prev,
+        first_name: updatedProfile.data.user.first_name || '',
+        middle_name: updatedProfile.data.user.middle_name || '',
+        last_name: updatedProfile.data.user.last_name || '',
+        phone_number: updatedProfile.data.user.phone_number || '',
+        bio: updatedProfile.data.bio || '',
+        address_line1: updatedProfile.data.address_line1 || '',
+        address_line2: updatedProfile.data.address_line2 || '',
+        postcode: updatedProfile.data.postcode || '',
+        state: updatedProfile.data.state || '',
+        email: updatedProfile.data.user.email || '',
+        country: updatedProfile.data.country || '',
+        region: updatedProfile.data.region || '',
+      }));
       setEditing(false);
       setMessage('Profile updated!');
     } catch (error) {
@@ -90,7 +116,6 @@ const ViewProfile = () => {
       encodeURIComponent(`${user.first_name || ''} ${user.last_name || ''}`) +
       '&background=random&color=fff&size=128';
   
-      
   return (
     <div className="container">
       <div className="row">
@@ -105,27 +130,26 @@ const ViewProfile = () => {
               <p className="text-black/50">{formData.bio}</p>
             )}
           </div>
-        </div>
+        </div>    
 
         {/* Right Column */}
         <div className="right-column">
           <div className="p-3 py-5">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h4>Profile Settings</h4>
-              
             </div>
             <div className="row mt-2">
               <div className="col-md-6">
                 <label className="labels">First Name:  &nbsp;</label><br />
-                <input type="text" name="name" value={profile.user.first_name} onChange={handleChange} className="form-control" disabled={!editing} />
-              </div>
-              <div className="col-md-6">
-                <label className="labels">Surname:  &nbsp;</label><br />
-                <input type="text" name="surname" value={profile.user.last_name} onChange={handleChange} className="form-control" disabled={!editing} />
+                <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} className="form-control" disabled={!editing} />
               </div>
               <div className="col-md-6">
                 <label className="labels">Middle Name:  &nbsp;</label><br />
-                <input type="text" name="surname" value={profile.user.middle_name} onChange={handleChange} className="form-control" disabled={!editing} />
+                <input type="text" name="middle_name" value={formData.middle_name} onChange={handleChange} className="form-control" disabled={!editing} />
+              </div>
+              <div className="col-md-6">
+                <label className="labels">Surname:  &nbsp;</label><br />
+                <input type="text" name="last_name" value={formData.last_name} onChange={handleChange} className="form-control" disabled={!editing} />
               </div>
             </div>
 
@@ -143,7 +167,7 @@ const ViewProfile = () => {
                   <input
                     type="text"
                     name={field}
-                    value={profile.user[field]}
+                    value={formData[field]}
                     onChange={handleChange}
                     className="form-control"
                     placeholder={label.toLowerCase()}
@@ -178,10 +202,9 @@ const ViewProfile = () => {
             )}
           </div>
           <button className="edit_button" onClick={() => setEditing(!editing)}>
-                {editing ? 'Cancel' : 'Edit'}
+            {editing ? 'Cancel' : 'Edit'}
           </button>
         </div>
-        
       </div>
 
       <style jsx>{`
@@ -235,8 +258,6 @@ const ViewProfile = () => {
         input.form-control {
           margin-bottom: 10px;
           padding: 10px;
-          justify-content: end;
-          align-items: end;
         }
 
         .profile-button {

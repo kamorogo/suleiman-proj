@@ -4,8 +4,11 @@ import { useParams } from "react-router-dom";
 
 const Renew = () => {
   const [license, setLicense] = useState(null);
+  const [renewalDate, setRenewalDate] = useState("");
   const [newExpiryDate, setNewExpiryDate] = useState("");
   const [document, setDocument] = useState(null);
+  const [paid_amount, setPaidAmount] = useState('');
+  const [notes, setNotes] = useState('');
   const [subscriptionType, setSubscriptionType] = useState("");
   const [provider, setProvider] = useState("");
   const [renewalHistory, setRenewalHistory] = useState([]);
@@ -26,10 +29,13 @@ const Renew = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
+    formData.append("renewal_date", renewalDate);
     formData.append("new_expiry_date", newExpiryDate);
     formData.append("renewal_document", document);
+    formData.append("paid_amount", paid_amount);
     formData.append("subscription_type", subscriptionType);
     formData.append("provider", provider);
+    formData.append("notes", notes);
 
     try {
       await axios.post(
@@ -59,11 +65,32 @@ const Renew = () => {
       <h2>Renew License</h2>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div className="form-group">
+          <label>Renewal Date</label>
+          <input
+            type="date"
+            className="input"
+            value={renewalDate}
+            onChange={(e) => setRenewalDate(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="form-group">
           <label>New Expiry Date</label>
           <input
             type="date"
             className="input"
             onChange={(e) => setNewExpiryDate(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Paid Amount</label>
+          <input
+            type="number"
+            step="0.01"
+            className="input"
+            onChange={(e) => setPaidAmount(e.target.value)}
             required
           />
         </div>
@@ -99,6 +126,14 @@ const Renew = () => {
             <option value="36">Triennial</option>
             <option value="48">Quadrennial</option>
           </select>
+        </div>
+
+        <div className="form-group">
+          <label>Notes</label>
+          <textarea
+            className="input"
+            onChange={(e) => setNotes(e.target.value)}
+          ></textarea>
         </div>
 
         <button type="submit" className="btn btn-primary">
