@@ -18,6 +18,8 @@ import ViewProfile from "./components/ViewProfile.jsx";
 import ViewDetails from "./components/ViewDetails.jsx";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import ForgotPassword from "./components/ForgotPassword.jsx";
+import ResetPassword from "./components/ResetPassword.jsx";
 import Renewals from "./pages/Renewals.jsx";
 
 
@@ -30,6 +32,11 @@ function App() {
             <Route path="/sign_in" element={<SignIn />} />
             <Route path="/sign_up" element={<SignUp />} />
             <Route path="/logout" element={<SignOut />} />
+
+
+            {/* Forgot/Reset Password Routes */}
+            <Route path="/forgot_password" element={<ForgotPassword />} />
+            <Route path="/reset_password/:uidb64/:token" element={<ResetPassword />} />
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>

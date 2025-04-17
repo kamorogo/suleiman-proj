@@ -5,6 +5,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LicenseRenew.settings')
 import re
 from io import BytesIO
 import traceback
+import random
 import sys
 from django.conf import settings
 from django.core.mail import send_mail
@@ -12,8 +13,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.authentication import TokenAuthentication
 import fitz
 import uuid
+from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 import pytesseract
 from PIL import Image
 from django.contrib.auth.hashers import make_password
@@ -21,9 +23,13 @@ from django.contrib.auth import get_user_model
 from fuzzywuzzy import fuzz
 from dateutil import parser
 from docx import Document
+from django.db import transaction
 from django.db.models import Count, Sum, Q
 from odf.opendocument import load 
 from odf.text import P
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 from pdf2image import convert_from_path
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseNotFound, FileResponse
@@ -35,7 +41,7 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import SubscriptionSerializer, SignUpSerializer, SignInSerializer, User_ProfileSerializer
-from .models import Subscription, Providers, Users, User_Profile
+from .models import Subscription, Providers, Users, User_Profile,OTP
 from .tasks import send_software_reminder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -233,7 +239,7 @@ def trigger_email(request):
         return Response({"error": str(e)}, status=500)
 
 # ----DOWNLOAD---- #
-def download_subscription (request, id):
+def download_subscription(request, id):
     subscription = get_object_or_404(Subscription, id=id)
 
     if subscription.document:
@@ -466,6 +472,49 @@ class LoggedUser(APIView):
             "name": user.username,
             "email": user.email,
         })
+    
+# ----PASSWORD LOGIC---- #
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        try:
+            user = Users.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = PasswordResetTokenGenerator().make_token(user)
+            reset_link = f"http://127.0.0.1:3000/reset_password/{uid}/{token}/"
+
+            send_mail(
+                subject="Reset Your Password",
+                message=f"Click the link to reset your password: {reset_link}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "Password reset link sent"}, status=status.HTTP_200_OK)
+        except Users.DoesNotExist:
+            return Response({"error": "Email not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ResetPasswordView(APIView):
+    def post(self, request, uidb64, token):
+        password = request.data.get("password")  
+        try:
+            
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = get_user_model().objects.get(id=uid)
+
+         
+            if PasswordResetTokenGenerator().check_token(user, token):
+                user.set_password(password)  
+                user.save()  
+                return Response({"message": "Password reset successful"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
+
+        except (get_user_model().DoesNotExist, ValueError, TypeError):
+            return Response({"error": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 # ----SUBCSRIPTION STATUS---- #
 def subscription_status(request, id):
@@ -515,30 +564,41 @@ class UserProfileView(APIView):
 
     def put(self, request):
         profile = get_object_or_404(User_Profile, user=request.user)
-        serializer = User_ProfileSerializer(profile, data=request.data, partial=True)
-        
-        if serializer.is_valid():
-            serializer.save()
+        user_data = request.data.get('user', None)
 
-            user_data = request.data.get('user')
+        serializer = User_ProfileSerializer(profile, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()  
+
             if user_data:
                 updated = False
-                if 'first_name' in user_data:
-                    request.user.first_name = user_data['first_name']
+                user = request.user
+
+                if 'first_name' in user_data and user.first_name != user_data['first_name']:
+                    user.first_name = user_data['first_name']
                     updated = True
-                if 'last_name' in user_data:
-                    request.user.last_name = user_data['last_name']
+                if 'last_name' in user_data and user.last_name != user_data['last_name']:
+                    user.last_name = user_data['last_name']
                     updated = True
+                if 'middle_name' in user_data and hasattr(user, 'middle_name') and user.middle_name != user_data['middle_name']:
+                    user.middle_name = user_data['middle_name']
+                    updated = True
+                if 'email' in user_data and user.email != user_data['email']:
+                    user.email = user_data['email']
+                    updated = True
+                if 'phone_number' in user_data and user.phone_number != user_data['phone_number']:
+                    user.phone_number = user_data['phone_number']
+                    updated = True
+
                 if updated:
-                    request.user.save()
-                    profile.generate_initials_avatar()
-                    profile.save()
+                    user.save()
 
             return Response(serializer.data, status=200)
 
         return Response(serializer.errors, status=400)
-           
-       
+
+
 
 
 # ----RENEW---- #

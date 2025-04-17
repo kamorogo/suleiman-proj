@@ -68,8 +68,39 @@ class User_Profile(models.Model):
 
         buffer = io.BytesIO()
         image.save(buffer, format='PNG')
-        file_name = f'{self.user.username}_avatar.png'
-        self.profile_picture.save(file_name, ContentFile(buffer.getvalue()), save=False)
+        buffer.seek(0)  
+
+        return buffer  
+
+    def save(self, *args, **kwargs):
+        user_data = kwargs.pop('user_data', None)
+
+      
+        if user_data:
+            user = self.user
+            updated = False
+
+            if 'first_name' in user_data and user.first_name != user_data['first_name']:
+                user.first_name = user_data['first_name']
+                updated = True
+            if 'last_name' in user_data and user.last_name != user_data['last_name']:
+                user.last_name = user_data['last_name']
+                updated = True
+            if 'email' in user_data and user.email != user_data['email']:
+                user.email = user_data['email']
+                updated = True
+            if 'phone_number' in user_data and user.phone_number != user_data['phone_number']:
+                user.phone_number = user_data['phone_number']
+                updated = True
+
+            if updated:
+                user.save()
+
+       
+        self.generate_initials_avatar()
+
+        super().save(*args, **kwargs)
+
     
 
     
@@ -185,3 +216,11 @@ class Renewals(models.Model):
 
     def __str__(self):
         return f"{self.subscription} - Renewed on {self.renewal_date}"
+    
+
+
+class OTP(models.Model):
+    user = models.ForeignKey('Users', on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_used = models.BooleanField(default=False)

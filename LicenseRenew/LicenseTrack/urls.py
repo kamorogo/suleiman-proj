@@ -2,7 +2,7 @@ from django.urls import path
 from django.urls import path, include
 from django.contrib.auth.views import LoginView 
 from rest_framework.routers import DefaultRouter
-from .views import extract_text, CreateLicense, generate_report, renew_subscription, trigger_email, list_software, get_software, delete_software, LicenseUpdateView, download_subscription
+from .views import extract_text, CreateLicense, ForgotPasswordView, ResetPasswordView, generate_report, renew_subscription, trigger_email, list_software, get_software, delete_software, LicenseUpdateView, download_subscription
 from .views import SubscriptionReportAPIView, SubscriptionDataAPIView, SubscriptionTypeReportAPIView, ProvidersListAPIView, SignUpView, SignInView, SignOutView, LoggedUser, UserProfileView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -41,5 +41,7 @@ urlpatterns = [
 
     path('profile/', UserProfileView.as_view(), name='user_profile'),
 
-    path('renew/', renew_subscription,)
+    path('renew/', renew_subscription, name='renew_subscription'),
+    path('forgot_password/', ForgotPasswordView.as_view(), name='forgot-password'),
+    path('reset_password/<uidb64>/<token>/', ResetPasswordView.as_view(), name='reset-password'),
 ]

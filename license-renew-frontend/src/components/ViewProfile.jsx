@@ -17,10 +17,9 @@ const ViewProfile = () => {
     address_line2: '',
     postcode: '',
     state: '',
-    area: '',
-    email: '',
     country: '',
     region: '',
+    email: '',
   });
 
   useEffect(() => {
@@ -66,36 +65,58 @@ const ViewProfile = () => {
 
   const handleSave = async () => {
     setSaving(true);
-
+  
     const token = localStorage.getItem('token');
     if (!token) return;
-
+  
+   
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      phone_number,
+      email,
+      ...profileData
+    } = formData;
+  
+    const dataToSend = {
+      ...profileData,
+      user: {
+        first_name,
+        middle_name,
+        last_name,
+        phone_number,
+        email,
+      },
+    };
+  
     try {
-      await axios.put('http://127.0.0.1:8000/profile/', formData, {
+      await axios.put('http://127.0.0.1:8000/profile/', dataToSend, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+  
       const updatedProfile = await axios.get('http://127.0.0.1:8000/profile/', {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+  
       setProfile(updatedProfile.data);
-      setFormData(prev => ({
-        ...prev,
+      setFormData({
         first_name: updatedProfile.data.user.first_name || '',
         middle_name: updatedProfile.data.user.middle_name || '',
         last_name: updatedProfile.data.user.last_name || '',
         phone_number: updatedProfile.data.user.phone_number || '',
+        email: updatedProfile.data.user.email || '',
         bio: updatedProfile.data.bio || '',
         address_line1: updatedProfile.data.address_line1 || '',
         address_line2: updatedProfile.data.address_line2 || '',
         postcode: updatedProfile.data.postcode || '',
         state: updatedProfile.data.state || '',
-        email: updatedProfile.data.user.email || '',
         country: updatedProfile.data.country || '',
         region: updatedProfile.data.region || '',
-      }));
+      });
+  
       setEditing(false);
       setMessage('Profile updated!');
     } catch (error) {
@@ -105,6 +126,7 @@ const ViewProfile = () => {
       setSaving(false);
     }
   };
+  
 
   if (loading) return <div>Loading...</div>;
   if (!profile) return <div>Profile not found.</div>;
@@ -115,7 +137,7 @@ const ViewProfile = () => {
     : 'https://ui-avatars.com/api/?name=' +
       encodeURIComponent(`${user.first_name || ''} ${user.last_name || ''}`) +
       '&background=random&color=fff&size=128';
-  
+
   return (
     <div className="container">
       <div className="row">

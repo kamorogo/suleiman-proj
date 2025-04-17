@@ -280,14 +280,14 @@ const Dashboard = () => {
                     </div>
                 </div>
                 <div className='client-image'>
-                    <img src='/Safaricom.png' className='client-logo' alt='Safaricom' />
-                    <img src='/Meta.png' className='client-logo' alt='Meta' />
-                    <img src='/Amazon.png' className='client-logo' alt='Amazon' />
-                    <img src='/Google.png' className='client-logo' alt='Google' />
-                    <img src='/Microsoft.png' className='client-logo' alt='Microsoft' />
-                    <img src='/Airtel.png' className='client-logo' alt='Airtel' />
-                    <img src='/Telkom.png' className='client-logo' alt='Telkom' />
-                    <img src='/IBM_logo.png' className='client-logo' alt='IBM' />
+                    <img src='/safaricom.png' className='client-logo' alt='Safaricom' />
+                    <img src='/meta.png' className='client-logo' alt='Meta' />
+                    <img src='/amazon.png' className='client-logo' alt='Amazon' />
+                    <img src='/google.png' className='client-logo' alt='Google' />
+                    <img src='/microsoft.png' className='client-logo' alt='Microsoft' />
+                    <img src='/airtel.png' className='client-logo' alt='Airtel' />
+                    <img src='/telkom.png' className='client-logo' alt='Telkom' />
+                    <img src='/ibm.png' className='client-logo' alt='IBM' />
                 </div>
             </div>
         </div>
