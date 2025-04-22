@@ -4,11 +4,10 @@ import { useNavigate, Link } from "react-router-dom";
 const Login = () => {
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
     password: "",
   });
   const [error, setError] = useState("");
-  const [passwordVisible, setPasswordVisible]= useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,13 +26,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (emailPattern.test(formData.username)) {
-     
-    } else {
-      
-    }
+
     try {
       const response = await fetch("http://127.0.0.1:8000/user/sign_in/", {
         method: "POST",
@@ -55,99 +48,110 @@ const Login = () => {
   };
 
   const togglePasswordVisibility = () => {
-    setPasswordVisible(!passwordVisible); 
+    setPasswordVisible(!passwordVisible);
   };
 
   return (
-    <div className="login-page">
-      <section className="login-section">
-        <div className="login-container">
-          <div className="login-image">
+    <div className="signup-box">
+      <div className="signup-left">
+        <div>
+          {/* <div className="logo">ABC Bank Renew</div> */}
+          <h1 className="headline">Welcome Back!</h1>
+          <p className="description">
+            Sign In to track and manage your licenses. Stay ahead of renewals effortlessly.
+          </p>
+        </div>
+        <div className="login-image">
             <img
               src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
               alt="Login visual"
             />
           </div>
+      </div>
 
-          <div className="login-form">
-            <form onSubmit={handleSubmit}>
-              <div className="text-center mb-4">
-                <h2 className="text-2xl font-bold">Sign In</h2>
-              </div>
+      <div className="signup-right">
+        <form onSubmit={handleSubmit} className="signup-form">
+          <h2 className="form-title">Sign In</h2>
 
-              {error && <p className="error-text">{error}</p>}
+          {error && <p className="error">{error}</p>}
 
-              <div className="mb-6">
-                <input
-                  onChange={handleChange}
-                  type="text"
-                  name="username"
-                  className="form-control"
-                  placeholder="Email or Username"
-                  value={formData.username}
-                  required
-                />
-              </div>
-
-
-              <div className="mb-6">
-                <input
-                  onChange={handleChange}
-                  type={passwordVisible ? "text" : "password"}
-                  name="password"
-                  className="form-control"
-                  placeholder="Password"
-                  required
-                />
-                  <div className="show-hide-icon" onClick={togglePasswordVisibility}>
-                    <i className={passwordVisible ? "fa fa-eye-slash" : "fa fa-eye"}></i>
-                  </div>
-              </div>
-
-              <div className="form-options mb-6">
-                <label className="form-check-label">
-                  <input type="checkbox" className="form-check-input" />
-                  Remember me
-                </label>
-                <Link to="/forgot_password" className="link">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <button type="submit" className="btn-submit">
-                Login
-              </button>
-
-              <p className="register-text">
-                Don't have an account?{" "}
-                <Link to="/sign_up" className="register-link">
-                  Register
-                </Link>
-              </p>
-            </form>
+          <input
+            type="text"
+            name="username"
+            placeholder="Email or Username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
+          <div className="password-wrapper">
+            <input
+              type={passwordVisible ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <span className="show-hide-icon" onClick={togglePasswordVisibility}>
+              <i className={passwordVisible ? "fa fa-eye-slash" : "fa fa-eye"}></i>
+            </span>
           </div>
-        </div>
-      </section>
+
+          <div className="form-options">
+            <label className="form-check-label">
+              <input type="checkbox" className="form-check-input" /> Remember me
+            </label>
+            <Link to="/forgot_password" className="signin-link">
+              Forgot password?
+            </Link>
+          </div>
+
+          <button type="submit" className="submit-btn">Login</button>
+
+          <p className="login-link">
+            Don’t have an account?{" "}
+            <Link to="/sign_up" className="signin-link">Register</Link>
+          </p>
+        </form>
+      </div>
 
       <style>
-        {`
-.login-section {
-  min-height: auto;
+  {`
+.signup-box {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  background-color: #FFF;
+  height: 100vh;
+  width: 100vw;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
 }
 
-.login-container {
+.signup-left {
+  width: 50%;
+  background: linear-gradient(to bottom right, #1e3a8a, #3b82f6);
+  color: white;
+  padding: 40px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  max-width: 1200px;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.headline {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.description {
+  font-size: 14px;
+  color: #d1d5db;
+}
 .login-image {
   flex: 2;
   text-align: center;
@@ -159,127 +163,139 @@ const Login = () => {
   height: auto;
 }
 
-.login-form {
-  flex: 1;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-
+.signup-right {
+  width: 50%;
+  background: white;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-@media (max-width: 768px) {
-  .login-image,
-  .login-form {
-    flex: 1 1 100%;
-    max-width: 100%;
-    margin-bottom: 1.5rem;
-  }
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.text-center {
+
+.form-title {
   text-align: center;
+  color: #1e3a8a;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.mb-4 {
-  margin-bottom: 1rem;
+.signup-form input {
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%; 
 }
 
-.mb-6 {
-  margin-bottom: 1.5rem;
-}
-.mb-6 {
+.password-wrapper {
   position: relative;
 }
 
 .show-hide-icon {
   position: absolute;
-  right: 10px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
 }
 
-.show-hide-icon i {
-  font-size: 18px;
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
+.submit-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px; 
+  border: none;
   border-radius: 6px;
-  background: #fff;
-  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  width: 20%; 
+  margin-top: 12px;
 }
 
-.form-control:focus {
-  border-color: #2563eb;
-  outline: none;
+.submit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.error {
+  color: #dc2626;
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-link {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.signin-link {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.signin-link:hover {
+  text-decoration: underline;
 }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 14px;
 }
 
-.form-check-input {
-  margin-right: 0.5rem;
+/* Mobile and tablet responsiveness */
+@media (max-width: 768px) {
+  .signup-box {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .signup-left,
+  .signup-right {
+    width: 100%;
+    padding: 30px;
+  }
+
+  .signup-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  .learn-more-btn {
+    margin: 20px auto 0 auto;
+  }
+
+  .form-title {
+    font-size: 20px;
+  }
+
+  .signup-form input {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .submit-btn {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+
+  .login-link {
+    font-size: 13px;
+  }
 }
+  `}
+</style>
 
-.link {
-  font-size: 0.875rem;
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-
-
-.btn-submit {
-  width: auto;
-  padding: 0.75rem;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-   margin-right: auto;
-}
-
-.btn-submit:hover {
-  background-color: #1e40af;
-}
-
-.error-text {
-  color: #dc2626;
-  text-align: center;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-
-.register-text {
-  text-align: left;
-  font-size: 0.875rem;
-  margin-top: 1.5rem;
-}
-
-.register-link {
-  color: #dc2626;
-  text-decoration: none;
-}
-
-.register-link:hover {
-  color: #b91c1c;
-  text-decoration: underline;
-}
-`}
-      </style>
     </div>
   );
 };

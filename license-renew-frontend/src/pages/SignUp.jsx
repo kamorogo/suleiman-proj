@@ -65,7 +65,7 @@ const SignUp = () => {
       <div className="signup-left">
         <div>
           <div className="logo">ABC Bank Renew</div>
-          <h1 className="headline">Register and Join us today!</h1>
+          <h1 className="headline">Register to Join us today!</h1>
           <p className="description">
             Track and manage your licenses with ease and never miss a renewal.
           </p>
@@ -112,7 +112,6 @@ const SignUp = () => {
   box-shadow: none;
 }
 
-/* Left side */
 .signup-left {
   width: 50%;
   background: linear-gradient(to bottom right, #1e3a8a, #3b82f6);
