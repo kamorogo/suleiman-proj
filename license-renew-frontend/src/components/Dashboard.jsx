@@ -41,8 +41,10 @@ const Dashboard = () => {
         {/* -SECTION 1- */}
         <div className='page1'>
             <headeR className='headeR'>
+                <div className="logo-section">
                     <img src="logO1.png" className="logo" alt="logo" />
-                    <h11>ABC Bank</h11>
+                    <h1 className="bank-name">ABC Bank</h1>
+                </div>
                 <nav>
                     <ul>
                         <li><a href="#home">Home</a></li>
@@ -304,7 +306,7 @@ const Dashboard = () => {
                     <img src="Visa.png" alt="Visa" />
                     <img src="Mastercard.png" alt="MasterCard" />
                     <img src="Mpesa.png" alt="M-Pesa" />
-                    <img src="Airtel.png" alt="Airtel" />
+                    <img src="airtel.png" alt="airtel" />
                 </div>
                 <p>For more details, feel free to contact us!</p>
             </div>

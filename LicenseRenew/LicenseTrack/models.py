@@ -51,26 +51,47 @@ class User_Profile(models.Model):
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
     
-    def generate_initials_avatar(self):
-        name = f"{self.user.first_name} {self.user.last_name}".strip()
-        initials = ''.join([word[0].upper() for word in name.split() if word])
+def generate_initials_avatar(self) -> io.BytesIO:
+    name = f"{self.user.first_name} {self.user.last_name}".strip()
+    initials = ''.join([word[0].upper() for word in name.split() if word])
 
-        image = Image.new("RGB", (150, 150), color=(255, 255, 255))
-        draw = ImageDraw.Draw(image)
+    image_size = (150, 150)
+    image = Image.new("RGB", image_size, color=(255, 255, 255))
+    draw = ImageDraw.Draw(image)
+
+    # List of font files to try
+    font_paths = [
+        "path/to/your/font.ttf",
+        "path/to/your/font.otf",
+        "path/to/your/backup_font.ttf",
+        "path/to/your/backup_font.otf",
+    ]
+
+    font = None
+    for font_path in font_paths:
+        if os.path.exists(font_path):
+            try:
+                font = ImageFont.truetype(font_path, 50)
+                break
+            except Exception as e:
+                print(f"Failed to load font from {font_path}: {e}")
+    
+    if not font:
         font = ImageFont.load_default()
 
-        bbox = draw.textbbox((0, 0), initials, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-        position = ((150 - text_width) / 2, (150 - text_height) / 2)
+    
+    bbox = draw.textbbox((0, 0), initials, font=font)
+    text_width = bbox[2] - bbox[0]
+    text_height = bbox[3] - bbox[1]
+    position = ((image_size[0] - text_width) / 2, (image_size[1] - text_height) / 2)
 
-        draw.text(position, initials, fill=(0, 0, 0), font=font)
+    draw.text(position, initials, fill=(0, 0, 0), font=font)
 
-        buffer = io.BytesIO()
-        image.save(buffer, format='PNG')
-        buffer.seek(0)  
+    buffer = io.BytesIO()
+    image.save(buffer, format='PNG')
+    buffer.seek(0)
+    return buffer
 
-        return buffer  
 
     def save(self, *args, **kwargs):
         user_data = kwargs.pop('user_data', None)
