@@ -22,7 +22,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from fuzzywuzzy import fuzz
 from dateutil import parser
-from docx import Document
+# from docx import Document
 from django.db import transaction
 from django.db.models import Count, Sum, Q
 from odf.opendocument import load 

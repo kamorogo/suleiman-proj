@@ -120,14 +120,14 @@ const About = () => {
                             <button>Read More..</button>
                     </div>
                     <div className='logo'>
-                        <img src='/logo.png' className='logo' alt='logo'/>
+                        <img src='/logO.png' className='logo' alt='logo'/>
                     </div>
                 </div>
             </div>
             <div className='More'>
                 <div className='container'>
                     <div className='card'>
-                        <img src='/CEO.jpg' className='dp' alt='logo'/>
+                        <img src='/SAVANI.webp' className='dp' alt='logo'/>
                     <h2>Group MD</h2>
                     <p>Shamaz Savani</p>
                     <a href='https://www.linkedin.com/in/shamaz/' className='btn'>contacts</a>

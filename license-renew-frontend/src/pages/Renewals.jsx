@@ -149,8 +149,6 @@ const Renewal = () => {
         })}
         </div>
 
-
-
         <style>
             {
                 `
@@ -158,8 +156,6 @@ const Renewal = () => {
                 padding: 10px 200px;
                 background-color: #f9fafb;
                 }
-
-             
                 .cardheader {
                 display: flex;
                 align-items: center;
@@ -317,8 +313,6 @@ const Renewal = () => {
                 .subscription-price.expired {
                 color: #ef4444;
                 }
-
-                /* Text helpers */
                 .text-center {
                 text-align: center;
                 }
@@ -330,12 +324,77 @@ const Renewal = () => {
                 .text-red {
                 color: #ef4444;
                 }
-
-                /* Spacing for list of subscriptions */
                 .space-y-2 > * + * {
                 margin-top: 0.5rem;
                 }
+                 @media (max-width: 1024px) {
+                .bodyrenewals {
+                    padding: 10px 50px;
+                }
+                .cardheader {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .midheader {
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+                .renewals-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .subscription-box {
+                    flex-direction: column;
+                    padding: 1rem;
+                }
+            }
 
+            @media (max-width: 768px) {
+                .bodyrenewals {
+                    padding: 10px 20px;
+                }
+                .cardheader {
+                    padding: 0.5rem;
+                }
+                .user-name {
+                    font-size: 1rem;
+                }
+                .button {
+                    width: 100%;
+                    text-align: center;
+                }
+                .subscription-dates {
+                    gap: 10px;
+                    font-size: 0.7rem;
+                }
+                .subscription-price {
+                    font-size: 0.75rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .bodyrenewals {
+                    padding: 10px 10px;
+                }
+                .profile-avatar {
+                    width: 36px;
+                    height: 36px;
+                }
+                .Profile {
+                    width: 2.5rem;
+                    height: 2.5rem;
+                }
+                .user-name {
+                    font-size: 0.875rem;
+                }
+                .subscription-name {
+                    font-size: 0.875rem;
+                }
+                .subscription-dates {
+                    font-size: 0.7rem;
+                }
+            }
+               
                 `
             }
         </style>

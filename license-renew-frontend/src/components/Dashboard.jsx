@@ -111,27 +111,28 @@ const Dashboard = () => {
         {/* -SECTION 2- */}
         <div className='page2'>
             <div className='topper'>
-                <h21>Reasons for choosing ABC</h21>
+                <h2>Reasons for choosing ABC</h2>
             </div>
             <div className='pg2-container'>
-                <div class="feature">
-                    <i class="fa-solid fa-check"></i>
+                <div className="feature">
+                    <i className="fa-solid fa-check"></i>
                     <h2>User Friendly</h2>
                 </div>
-                <div class="feature">
-                <i class="fa-solid fa-check"></i>
+                <div className="feature">
+                    <i className="fa-solid fa-check"></i>
                     <h2>Secure & Flexible</h2>
                 </div>
-                <div class="feature">
-                    <i class="fa-solid fa-check"></i>
+                <div className="feature">
+                    <i className="fa-solid fa-check"></i>
                     <h2>Customer Support</h2>
                 </div>
-                <div class="feature">
-                    <i class="fa-solid fa-check"></i>
+                <div className="feature">
+                    <i className="fa-solid fa-check"></i>
                     <h2>Responsive Interface</h2>
                 </div>
             </div>
         </div>
+
         {/* -SECTION 3- */}
         <div className='page3'>
             <div className='pg3-container'>
@@ -371,13 +372,6 @@ const Dashboard = () => {
                 </div>
            </div>
         </footer>
-        <style jsx >
-            {
-                `
-               
-                `
-            }
-        </style>
     </div>            
   )
 }
