@@ -55,8 +55,7 @@ const Login = () => {
     <div className="signup-box">
       <div className="signup-left">
         <div>
-          {/* <div className="logo">ABC Bank Renew</div> */}
-          <h1 className="headline">Welcome Back!</h1>
+          <h11 className="headline">Welcome Back!</h11>
           <p className="description">
             Sign In to track and manage your licenses. Stay ahead of renewals effortlessly.
           </p>
@@ -127,7 +126,7 @@ const Login = () => {
 }
 
 .signup-left {
-  width: 50%;
+  width: 70%;
   background: linear-gradient(to bottom right, #1e3a8a, #3b82f6);
   color: white;
   padding: 40px;
@@ -143,13 +142,13 @@ const Login = () => {
 }
 
 .headline {
-  font-size: 36px;
+  font-size: 40px;
   font-weight: bold;
   margin-bottom: 20px;
 }
 
 .description {
-  font-size: 14px;
+  font-size: 30px;
   color: #d1d5db;
 }
 .login-image {
@@ -159,12 +158,12 @@ const Login = () => {
 
 .login-image img {
   width: 100%;
-  max-width: 700px;
+  max-width: 1000px;
   height: auto;
 }
 
 .signup-right {
-  width: 50%;
+  width: 30%;
   background: white;
   padding: 40px;
   display: flex;

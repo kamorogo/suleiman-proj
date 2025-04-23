@@ -178,8 +178,9 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 
 ##CELERY SETUP
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5673//'
+CELERY_RESULT_BACKEND = None
+# 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_RESULTS_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
@@ -187,14 +188,14 @@ CELERY_TIMEZONE = 'UTC'
 
 # Initialize environment variables
 env = environ.Env()
-environ.Env.read_env()  # Read .env file
+environ.Env.read_env()  
 
 # Email settings using environment variables
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # e.g., 'smtp.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com' 
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'alisuleimann4@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'ozgxgfguntjsyauj'  # Your email password
+EMAIL_HOST_USER = 'alisuleimann4@gmail.com'  
+EMAIL_HOST_PASSWORD = 'ozgxgfguntjsyauj' 
 DEFAULT_FROM_EMAIL = 'alisuleimann4@gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL: False

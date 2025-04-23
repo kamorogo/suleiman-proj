@@ -228,10 +228,10 @@ def delete_software(request, id):
 def trigger_email(request):
 
     try:
-     print("Sending Email")
-     send_software_reminder.delay()
-     print("Email Sent")
-     return Response({"message": "Email Notification triggered!"}, status=200)
+        print("Sending Email")
+        send_software_reminder.delay()
+        print("Email Sent")
+        return Response({"message": "Email Notification triggered!"}, status=200)
 
     except Exception as e:
         print("Error occured: ", str(e))

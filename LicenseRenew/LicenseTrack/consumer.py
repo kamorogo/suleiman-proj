@@ -12,7 +12,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LicenseRenew.settings")
 django.setup()
 
 
-                ###---USECASE2---###
+             
 def callback(ch, method, properties, body):
     data = json.loads(body)
     email = data['email']
