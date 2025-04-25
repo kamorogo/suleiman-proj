@@ -15,7 +15,7 @@ COPY requirements.txt .
 
 RUN pip install update pip
 
-#RUN pip install reportlab=3.6.8
+RUN pip install reportlab=3.6.8
 
 RUN set -eux; \
     while IFS= read -r pkg; do \
