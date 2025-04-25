@@ -42,7 +42,7 @@ from rest_framework import status, viewsets
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import SubscriptionSerializer, SignUpSerializer, SignInSerializer, User_ProfileSerializer
 from .models import Subscription, Providers, Users, User_Profile,OTP
-from .tasks import send_software_reminder
+from LicenseTrack.tasks import send_software_reminder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import json
