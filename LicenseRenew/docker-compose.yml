@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  broker:
+    image: rabbitmq:4.1.0-management
+    container_name: rabbitmqv1
+    ports:
+      - "5673:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: always
+
+  web:
+    build: .
+    command: gunicorn LicenseRenew.wsgi:application --bind 0.0.0.0:8000
+    # volumes:
+    #   - .:/project
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - broker
+    restart: always
+
+  worker:
+    build: .
+    command: celery -A LicenseRenew worker --loglevel=info
+    # volumes:
+    #   - .:/project
+    env_file:
+      - .env
+    depends_on:
+      - broker
+     
+    restart: always
+
+  beat:
+    build: .
+    command: celery -A LicenseRenew beat --loglevel=info
+    # volumes:
+    #   - .:/project
+    env_file:
+      - .env
+    depends_on:
+      - broker
+    restart: always
+
+volumes:
+  rabbitmq_data:

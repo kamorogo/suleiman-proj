@@ -178,7 +178,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 
 ##CELERY SETUP
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5673//'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERY_RESULT_BACKEND = None
 # 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
