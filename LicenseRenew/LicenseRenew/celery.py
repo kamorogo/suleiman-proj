@@ -15,7 +15,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.conf.beat_schedule = {
     "send-reminders-daily": {
         "task": "LicenseTrack.tasks.send_software_reminder",
-        "schedule": crontab(hour=0, minute=0),
+        "schedule": crontab(hour=10, minute=0),
     },
 }
 

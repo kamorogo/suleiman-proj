@@ -46,9 +46,9 @@ const Dashboard = () => {
                     <h1 className="bank-name">ABC Bank</h1>
                 </div>
                 <nav>
-                    <ul>
+                    <ul className="nav-links">
                         <li><a href="#home">Home</a></li>
-                        <li><a href="/contacts">Contact Us</a></li>
+                        <li><a href="/contacts">Contacts</a></li>
                         <li><a href="/about">About</a></li>
                         <li><a href="/services">Services</a></li>
                         <li class="user-profile">
@@ -76,6 +76,7 @@ const Dashboard = () => {
                 <div class="modal-overlay">
                     <div class="modal-content">
                         <label for="profile-toggle" class="close-btn">&times;</label>
+                        <br/>
                         <div className="license-profile-image">
 
                             {licenseData && (
@@ -97,15 +98,46 @@ const Dashboard = () => {
             </headeR>
             <div className='page1-main'>
                 <div className='pg1-container'>
-                    <div className='content'>
-                        <img src='/helpD.jpg' className="img" alt='img' />
+                    <div className='contenT'>
+                        <img src='/WhatsApp-Image-2025-02-18-at-10.56.19_b6b9654a.jpg' className="img" alt='img' />
                     </div>
                     <div className='words'>
-                        <h1>Your Trusted Partner in License Renewal!!
+
+                    <h1>Your Trusted Partner in License Renewal!!
                             <br/>
                         </h1>
                         <p1>As a leading digital banking provider, we are excited to introduce our latest service—  
                         a seamless and efficient license renewal system designed just for you....</p1>
+
+                        <br/>
+                        <br/>
+                        <br/>
+                        <br/>
+                        <br/>
+                        <br/>
+
+                        <ul>
+                            <li class="card renew">
+                                <div class="icon"><i class="fa-solid fa-refresh"></i></div>
+                                <div class="title">RENEW</div>
+                            </li>
+                            <li class="card create">
+                                <div class="icon"><i class="fa-solid fa-plus"></i></div>
+                                <div class="title">CREATE</div>
+                            </li>
+                            <li class="card manage">
+                                <div class="icon"><i class="fa-solid fa-cogs"></i></div>
+                                <div class="title">MANAGE</div>
+                            </li>
+                            <li class="card view">
+                                <div class="icon"><i class="fa-solid fa-eye"></i></div>
+                                <div class="title">VIEW</div>
+                            </li>
+                            <li class="card reports">
+                                <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
+                                <div class="title">REPORTS</div>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -119,18 +151,22 @@ const Dashboard = () => {
                 <div className="feature">
                     <i className="fa-solid fa-check"></i>
                     <h2>User Friendly</h2>
+                    <i className="fa-solid fa-smile"></i> 
                 </div>
                 <div className="feature">
                     <i className="fa-solid fa-check"></i>
                     <h2>Secure & Flexible</h2>
+                    <i className="fa-solid fa-lock"></i>
                 </div>
                 <div className="feature">
                     <i className="fa-solid fa-check"></i>
                     <h2>Customer Support</h2>
+                    <i className="fa-solid fa-headset"></i>
                 </div>
                 <div className="feature">
                     <i className="fa-solid fa-check"></i>
                     <h2>Responsive Interface</h2>
+                    <i className="fa-solid fa-laptop-code"></i> 
                 </div>
             </div>
         </div>
@@ -254,7 +290,9 @@ const Dashboard = () => {
                         <p >You can update your contact information by going to your profile page and editing the fields for your email and phone number.</p>
                     </details>
                 </div>
+                
             </div>
+          
         </div>
         {/* -SECTION 6- */}
         <div className='page6'>
@@ -320,62 +358,42 @@ const Dashboard = () => {
                 </form>  
             </div>
         </div>
+        <img src='Going-Green4-2.jpg' alt='GoGreen'  className="full-width-img" />
         {/* -SECTION 7- */}
-        <footer className='footer'>
-            <div class="footer-custom">
-                <div class="footer-container">
-                    <div class="footer-section">
-                        <div class="footer-content">
-                            <div class="footer-about">
-                                <div class="footer-logo">
-                                    <h3>Amazingly Better Choice</h3>
-                                </div>
-                                <p1>
-                                    One-stop shop for innovative financial solutions across Kenya and Uganda.
-                                </p1>
-                            </div>
-                                <ul class="social-content">
-                                    <li class="social-tem"><a href="https://www.facebook.com/abcbankgroup/" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i></a></li>
-                                    <li class="social-tem"><a href="https://www.x.com/ABCBankGroup" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a></li>
-                                    <li class="social-tem"><a href="https://www.instagram.com/abcbankgroup/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a></li>
-                                    <li class="social-tem"><a href="https://www.youtube.com/@abcbankgroup" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i></a></li>
-                                    <li class="social-tem"><a href="talk2us@abcthebank.com" target="_blank" rel="noopener noreferrer"><i class="fa fa-envelope"></i></a></li>
-                                </ul>
-                        </div>
-                        <div class="footer-content">
-                          <h4>Quick Links</h4>
-                            <ul class="footer-nav">
-                                <li><a href="#">HOME</a></li>
-                                <li><a href="/about">ABOUT</a></li>
-                                <li><a href="/contacts">CONTACTS</a></li>
-                                <li><a href="/services">SERVICES</a></li>
-                            </ul>
-                        </div>
-                        <div class="footer-content">
-                                <h4>Contact</h4>
-                            <ul class="footer-contact">
-                                <li class="femail">
-                                    <i class="bx bx-envelope" ></i>
-                                  <span>talktous@abcthebank.com</span>
-                                </li>
-                                <li class="fphone">
-                                  <i class='bx bx-phone'></i>
-                                  <span>Tel: (254)  701 700700</span>
-                                </li>
-                                <li class="flocation">
-                                  <i class='bx bxs-map'></i>
-                                  <span>Woodvale Grove, Westlands
-                                      <br />P.O Box 3610-00800 Nairobi, Kenya</span>
-                                </li>
-                            </ul>
-                        </div>
-                 </div>
-                    <p >ABC Bank Group &copy; Copyright rights reserved</p>
+        <footer>
+            <div class="footerContainer">
+                <div class="socialIcons">
+                    <a href="https://www.facebook.com/abcbankgroup/"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/abcbankgroup/"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.x.com/ABCBankGroup"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="https://www.google.com/search?gs_ssp=eJzj4tLP1Tcwza1KTzJUYDRgdGDw4ktMSlZISszLVshOzatMBACLogkq&q=abc+bank+kenya&oq=ABC+&gs_lcrp=EgZjaHJvbWUqEggCEC4YJxjHARjRAxiABBiKBTIGCAAQRRg5Mh8IARAuGIMBGMcBGNQCGIsDGKgDGLEDGNEDGNIDGIAEMhIIAhAuGCcYxwEY0QMYgAQYigUyCggDEAAYsQMYgAQyBwgEEAAYgAQyBwgFEAAYgAQyCggGEAAYiwMYgAQyFggHEC4YrwEYxwEYiwMYpgMYqAMYgAQyBwgIEAAYgAQyBwgJEAAYjwLSAQg0MjIxajFqN6gCALACAA&sourceid=chrome&ie=UTF-8"><i class="fa-brands fa-google-plus"></i></a>
+                    <a href="https://www.youtube.com/@abcbankgroup"><i class="fa-brands fa-youtube"></i></a>
                 </div>
-           </div>
+                
+                <div class="footerNav">
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/services">Services</a></li>
+                        <li><a href="/about">About</a></li>
+                        <li><a href="/contacts">Contact Us</a></li>
+                        <li><a href="">Our Team</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footerBottom">
+                <p>&copy; 2025 ABC Bank  |  ABC Bank is regulated by the Central Bank of Kenya.</p>
+            </div>
         </footer>
+
+
     </div>            
   )
 }
 
 export default Dashboard
+
+
+
+
+   
