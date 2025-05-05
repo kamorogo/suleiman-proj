@@ -132,7 +132,7 @@ class CreateLicense(APIView):
         print("Auth user:", request.user) 
         print("Is Authenticated:", request.user.is_authenticated)
 
-        user_instance = request.user
+        print("Request Data:", request.data)
 
         document = request.FILES.get("document")
         data = request.data
@@ -153,6 +153,10 @@ class CreateLicense(APIView):
         issue_date = extracted_data.get("issue_date", data.get("issue_date"))
         expiry_date = extracted_data.get("expiry_date", data.get("expiry_date"))
 
+        owner_full_name = data.get("owner_full_name", "")
+        owner_email = data.get("owner_email", "")
+        owner_department = data.get("owner_department", "")
+
         DURATION_TYPE_MAP = {
             0: "Trial",
             1: "Monthly",
@@ -170,26 +174,30 @@ class CreateLicense(APIView):
             except ValueError:
                 pass
 
-        if not all([subscription_type, service_provider, amount_paid, duration, issue_date, expiry_date]):
+        if not all([owner_full_name, owner_email, owner_department, service_provider, amount_paid, duration, issue_date, expiry_date]):
             return Response({"detail": "Missing required fields"}, status=400)
-
         provider_instance, created = Providers.objects.get_or_create(service_provider=service_provider, defaults={
             "address": "Unknown Address",
             "description": "Subscription service provider/vendor"
         })
 
+     
+
         license_instance = Subscription.objects.create(
-            users=user_instance,
+            users=request.user,
             providers=provider_instance,
             subscription_type=subscription_type,
             amount_paid=amount_paid,
             duration=duration,
+            owner_full_name=owner_full_name,
+            owner_email=owner_email,
+            owner_department=owner_department,
             issue_date=issue_date,
             expiry_date=expiry_date,
             document=document if document else None,
         )
 
-
+        serializer = SubscriptionSerializer(license_instance)
         return Response({"message": "License created successfully", "license_id": license_instance.id})
 
 

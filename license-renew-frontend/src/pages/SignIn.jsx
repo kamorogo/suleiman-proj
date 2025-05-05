@@ -65,11 +65,13 @@ const Login = () => {
               src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
               alt="Login visual"
             />
+            
           </div>
       </div>
 
       <div className="signup-right">
         <form onSubmit={handleSubmit} className="signup-form">
+        <img src='/logoWhite.png' className="form-logo" alt='img' />
           <h2 className="form-title">Sign In</h2>
 
           {error && <p className="error">{error}</p>}
@@ -169,6 +171,12 @@ const Login = () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+.form-logo {
+  width: 70%;
+  height: auto;
+  margin: 0 auto 0px auto;
+  display: block;
 }
 
 .signup-form {

@@ -11,6 +11,9 @@ const Create = () => {
         expiry_date: "",
         duration: "",
         subscription_type: "",
+        owner_full_name: "",
+        owner_email: "",
+        owner_department: "",
     });
     const navigate = useNavigate();
     const [file, setFile] = useState(null);
@@ -27,14 +30,21 @@ const Create = () => {
         48: "Quadrennial",
     };
     
+    const getSubscriptionType = (duration) => {
+        const parsed = parseInt(duration);
+        return durationToTypeMap[parsed] || `${parsed} Months`;
+    };
+
     const handleChanges = (e) => {
         const { name, value } = e.target;
-    
-        
         if (name === "duration") {
-            const durationValue = parseInt(value);
-            const subscriptionType = durationToTypeMap[durationValue] || `${durationValue} Months`; 
-            setFormData({ ...formData, [name]: value, subscription_type: subscriptionType });
+            const parsed = parseInt(value);
+            const type = durationToTypeMap[parsed] || "";
+            setFormData({
+                ...formData,
+                [name]: parsed,
+                subscription_type: type,
+            });
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -62,13 +72,16 @@ const Create = () => {
                 return;
             }
 
+            const extractedDuration = parseInt(response.data.duration) || 0;
+            const calculatedType = getSubscriptionType(extractedDuration);
+
             setFormData({
                 service_provider: response.data.service_provider || "",
                 amount_paid: response.data.amount_paid || "",
                 issue_date: response.data.issue_date || "",
                 expiry_date: response.data.expiry_date || "",
-                duration: response.data.duration || "",
-                subscription_type: response.data.subscription_type || "",
+                duration: extractedDuration,
+                subscription_type: calculatedType,
             });
 
             alert("Text extracted and form pre-filled!");
@@ -81,15 +94,24 @@ const Create = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        console.log("Form data before submit:", formData);
+
         if (!token) {
             alert("Token not found. Please log in.");
             return;
         }
 
+
         const data = new FormData();
         Object.keys(formData).forEach((key) => {
             data.append(key, formData[key]);
         });
+
+
+        data.append("owner_full_name", formData.owner_full_name || "");
+        data.append("owner_email", formData.owner_email || "");
+        data.append("owner_department", formData.owner_department || "");
+
         if (file) data.append("document", file);
 
         try {
@@ -102,7 +124,10 @@ const Create = () => {
                     }
                 }
             );
+            console.log("Backend response:", response.data);
             alert("License Created Successfully!");
+     
+
             navigate("/manage");
             setFormData({
                 service_provider: "",
@@ -111,6 +136,9 @@ const Create = () => {
                 expiry_date: "",
                 duration: "",
                 subscription_type: "",
+                owner_full_name: "",
+                owner_email: "",
+                owner_department: "",
             });
             setFile(null);
 
@@ -261,6 +289,15 @@ const Create = () => {
             `}</style>
 
             <form onSubmit={handleSubmit} className="applicationf">
+                <label>Owner Full Name:</label>
+                <input type="text" name="owner_full_name" value={formData.owner_full_name} onChange={handleChanges} className="fcontrol" placeholder="Full Name" />
+
+                <label>Owner Email:</label>
+                <input type="email" name="owner_email" value={formData.owner_email} onChange={handleChanges} className="fcontrol" placeholder="Email" />
+
+                <label>Owner Department:</label>
+                <input type="text" name="owner_department" value={formData.owner_department} onChange={handleChanges} className="fcontrol" placeholder="Department" />
+
                 <label>Upload Document: </label>
                 <input type="file" onChange={handleFileChanges} className="c-file-input" />
                 <button type="button" onClick={handleUpload} className="btn-R">Extract Data</button>

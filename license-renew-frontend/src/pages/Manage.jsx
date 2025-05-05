@@ -13,6 +13,12 @@ const Manage = () => {
     const [users, setUsers] = useState(null);
     const queryParams = new URLSearchParams(location.search);
     const selectedProvider = queryParams.get("provider") || "";
+    const ownerName = queryParams.get("owner");
+    const subscription_type = queryParams.get("subscriptiontype") || "";
+    const ownerEmail = queryParams.get("email");
+    const ownerDept = queryParams.get("department");
+    const expiryDate = queryParams.get("expiry");
+
 
 
     useEffect(() => {
@@ -27,11 +33,23 @@ const Manage = () => {
             console.log("Fetched data:", data);
             setLicenses(Array.isArray(data) ? data : []);
 
-            if (selectedProvider) {
-                setFilteredLicenses(data.filter(license => license.providers === selectedProvider));
-            } else {
-                setFilteredLicenses(data);
+            let filtered = data;
+
+            if (ownerName && subscription_type && ownerEmail && ownerDept && expiryDate) {
+                filtered = filtered.filter(license =>
+                    license.owner_full_name === ownerName &&
+                    license.subscription_type === subscription_type &&
+                    license.owner_email === ownerEmail &&
+                    license.owner_department === ownerDept &&
+                    license.expiry_date === expiryDate
+                );
             }
+
+            if (selectedProvider) {
+                filtered = filtered.filter(license => license.providers === selectedProvider);
+            }
+
+            setFilteredLicenses(filtered);
         } catch (error) {
             console.error("Error fetching licenses:", error);
             setLicenses([]);
@@ -133,8 +151,6 @@ const Manage = () => {
         }
     };
 
-    window.history.replaceState(null, null, '/providers');
-
 
     return (
         <div className="container">
@@ -158,14 +174,16 @@ const Manage = () => {
                         <th></th>
                         <th></th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                 {filteredLicenses.map((license, index) => (
                         <tr key={license.id}>
                             <td>{index + 1}</td>
-                            <td>{license.users ? `${license.users.first_name} ${license.users.last_name}`  : 'N/A'}</td>
-                            <td>{license.users ? license.users.email : 'N/A'}</td>
+                            <td>{license.owner_full_name}</td>
+                            <td>{license.owner_email}</td>
+                            <td>{license.owner_department}</td>
                             <td>{license.subscription_type}</td>
                             <td>{license.providers}</td>
                             <td>{license.duration} months</td>

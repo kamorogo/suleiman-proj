@@ -160,25 +160,18 @@ nav {
     color: #3498db;
   }
 
-.page1-main {
-padding: 0;
-height: 85vh;
-}
-.pg1-container {
-display: flex;
-justify-content: space-between;
-align-items: center;
-
-}
 .pg1-container{
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
+    padding-left: 40px;
+    padding-right: 40px;
+    gap: 20px; 
   }
 
 .contenT {
-    width: 55%;  
+    width: 60%;  
     height: 80vh;  
     margin-top: 50px;
     background-image: url("/home/Sali/Documents/License_Renew_Track_System/license-renew-frontend/public/Background4.jpg");
@@ -197,30 +190,6 @@ align-items: center;
     border-radius: 25% 10%;
 }
 
-.words {
-display: flex;
-width: 40%;
-flex-direction: column;
-text-align: justify;
-margin-right: 100px;
-}
-.words h1 {
-font-weight: bold;
-color: #003366;
-margin-bottom: 10px;
-font-size: 2rem;
-}
-.words p1 {
-color: #333;
-font-size: 1.2rem;
-margin-bottom: 0;
-font-weight: bold;
-}
-.page1 {
-  display: flex;
-  flex-direction: column;
-}
-
 .headeR {
   display: flex;
   justify-content: space-between;
@@ -236,38 +205,16 @@ font-weight: bold;
   align-items: center;
 }
 
-.pg1-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem;
-}
-
-.pg1-container .content .img {
-  width: 100%;
-  max-width: 400px;
-}
-
-.pg1-container .words {
-  max-width: 50%;
-}
-
-.words h1 {
-  font-size: 2rem;
-}
-
-.words p1 {
-  font-size: 1.2rem;
-  color: #333;
-}
 
 ul {
     width: 100%; 
     margin-inline: auto;
     display: flex; 
+    flex-wrap: wrap;
     justify-content: center; 
     gap: 2rem;
     list-style: none;
+    padding: 0;
   }
   
   ul li.card {
@@ -346,8 +293,92 @@ ul {
   ul li.reports {
     --accent-color: #994D7F;
   }
+
+  .words {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; 
+    padding-top: 30px;
+    text-align: justify;
+  }
+  
+  .words h1 {
+    margin-bottom: 20px; 
+    font-weight: bold;
+color: #003366;
+font-size: 2rem;
+margin-left: 50px;
+  }
+  .words h1, .words p {
+    margin: 0;
+    padding: 10px 0;
+    text-align: justify;
+  }
+  
+  
+  .words p {
+    color: #333;
+font-size: 1.2rem;
+font-weight: bold;
+    margin-bottom: 30px; 
+    margin-left: 50px;
+  }
+  
+  .search-filter {
+    position: relative; 
+    width: 300px; 
+    margin-bottom: 100px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 10px 30px 10px 10px; 
+    border: 2px solid #003366;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  
+  .search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%); 
+    color: #003366; 
+    font-size: 18px; 
+    pointer-events: none; 
+  }
+  .search-modal {
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 2px solid #003366;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 10px;
+    margin-top: 5px;
+  }
+  
+  .search-modal-results .subscription-card {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .search-modal-results .subscription-card:hover {
+    background-color: #f0f8ff;
+  }
+  
   
 
+  
 
 
 @media (max-width: 768px) {
@@ -378,6 +409,18 @@ ul {
       margin-top: 1rem;
     }
   }
+  @media (max-width: 1024px) {
+    ul li.card {
+      max-width: 10rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    ul li.card {
+      max-width: 100%; 
+    }
+  }
+  
 
 
 
@@ -1500,6 +1543,7 @@ nav ul {
         font-size: 12px;
     }
 }
+
 
 /* --- PAGE 6 (Client/Partner) Responsive --- */
 @media (max-width: 768px) {

@@ -84,7 +84,7 @@ ASGI_APPLICATION = 'LicenseRenew.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'SubscriptionsDB',
+        'NAME': 'SubscriptionDB',
         'USER': 'AdminS',
         'PASSWORD': '2025',
         'HOST': '127.0.0.1',

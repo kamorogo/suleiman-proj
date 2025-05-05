@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import './Dashboard.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const [subscriptionData, setSubscriptionData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const navigate = useNavigate();
   const [licenseData, setLicenseData] = useState(null);
   const token = localStorage.getItem('token');
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -15,10 +20,15 @@ const Dashboard = () => {
       }
 
       try {
+        const subsResponse = await fetch('http://127.0.0.1:8000/licenseS/');
+        const subsData = await subsResponse.json();
+        setSubscriptionData(subsData);
+        setFilteredData(subsData);
+
         const response = await axios.get('http://127.0.0.1:8000/profile/', {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            'Authoriz.ation': `Bearer ${token}`,
           },
         });
         setLicenseData(response.data);
@@ -29,6 +39,29 @@ const Dashboard = () => {
 
     fetchUserData();
   }, [token]);
+
+  const handleSearch = (query) => {
+    const lowerCaseQuery = query.toLowerCase();
+    const filtered = subscriptionData.filter((item) =>
+        item.owner_full_name?.toLowerCase().includes(lowerCaseQuery) ||
+        item.owner_email?.toLowerCase().includes(lowerCaseQuery) ||
+        item.subscription_type?.toLowerCase().includes(lowerCaseQuery) ||
+        item.expiry_date?.toLowerCase().includes(lowerCaseQuery) ||
+        item.owner_department?.toLowerCase().includes(lowerCaseQuery)
+    );
+
+    if (query.trim() === '') {
+        setFilteredData([]); 
+        return;
+      }
+
+    setFilteredData(filtered);
+
+    if (filtered.length > 0) {
+        const match = filtered[0];
+        navigate(`/manage?owner=${encodeURIComponent(match.owner_full_name)}&subscription=${encodeURIComponent(match.subscription_type)}&email=${encodeURIComponent(match.owner_email)}&department=${encodeURIComponent(match.owner_department)}&expiry=${encodeURIComponent(match.expiry_date)}`);
+      }
+};
 
   const getInitialsAvatar = (firstName, lastName) => {
     const initials = `${firstName ? firstName[0] : ''}${lastName ? lastName[0] : ''}`.toUpperCase();
@@ -66,7 +99,8 @@ const Dashboard = () => {
                             </label>
                         </li>
                         <a>
-                            <img class="trp-flag-image" src="https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Kenya.svg" width="18" height="12" alt="SW" /> KE
+                        <img src="/Kenya.png" width="18" height="12" alt="KE" />
+
                         </a>
                     </ul>
                 </nav>
@@ -101,13 +135,26 @@ const Dashboard = () => {
                     <div className='contenT'>
                         <img src='/WhatsApp-Image-2025-02-18-at-10.56.19_b6b9654a.jpg' className="img" alt='img' />
                     </div>
+
                     <div className='words'>
+
+                    <div className="search-filter">
+                            <input
+                                type="text"
+                                className="search-input"
+                                style={{ border: '2px solid #003366', display: 'block', padding: '10px' }}
+                                placeholder="Search by name, email, department..."
+                                onChange={(e) => handleSearch(e.target.value)}
+                            />
+                            <i className="fas fa-search search-icon"></i>
+
+                    </div>
 
                     <h1>Your Trusted Partner in License Renewal!!
                             <br/>
                         </h1>
-                        <p1>As a leading digital banking provider, we are excited to introduce our latest service—  
-                        a seamless and efficient license renewal system designed just for you....</p1>
+                        <p>As a leading digital banking provider, we are excited to introduce our latest service—  
+                        a seamless and efficient license renewal system designed just for you....</p>
 
                         <br/>
                         <br/>
@@ -240,60 +287,7 @@ const Dashboard = () => {
                     </div>
             </div>
         </div>
-        {/* -SECTION 5- */}
-        <div className='page5'>
-            <div className='box'>
-                <h>Frequently Asked Questions</h>
-                <div className='pg5-container'>
-                    <details>
-                        <summary>How to Renew your License?</summary>
-                        <p>
-                           1. Go to the Safaricom Portal<br/>
 
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Open the Safaricom services.<br/>
-                           2. Sign in<br/>
-
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use your credentials to sign in<br/>
-                           3. Check your Software Subscriptions<br/>
-
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Navigate to "My Subscriptions" .<br/>
-                           4. Select the Software expired<br/>
-
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click on the software.<br/>
-                           5. Confirm & Pay<br/>
-
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The portal will display the fee.<br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose M-Pesa, Card or Bank transfer as the payment method.<br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If using M-Pesa, enter the Paybill number provided.<br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pay and close.<br/>
-                           6. Receive Confirmation<br/>
-
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Once payment is successful, you will get an SMS confirming the payment.<br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Download or print the receipt.<br/>
-                           7. Upload the receipt to our website once done for renewal approve.
-                    </p>
-                    </details>
-                    <details>
-                        <summary>How can I upload my software license documents?</summary>
-                        <p>You can upload your software license documents by navigating to the 'Document Management' section of your dashboard and selecting the 'Upload' option.</p>
-                    </details>
-                    <details>
-                        <summary>What types of reminders does LicenseRenew provide?</summary>
-                        <p>LicenseRenew provides automated email reminders and in-app notifications for upcoming license renewals, with customizable schedules (e.g., 30, 15, or 7 days before expiry).</p>
-                    </details>
-                    <details>
-                        <summary>Can I generate reports in LicenseRenew?</summary>
-                        <p>Yes, LicenseRenew allows you to generate both PDF and Excel reports to track compliance and license statuses.</p>
-                    </details>
-                    <details>
-                        <summary>How do I update my contact information?</summary>
-                        <p >You can update your contact information by going to your profile page and editing the fields for your email and phone number.</p>
-                    </details>
-                </div>
-                
-            </div>
-          
-        </div>
         {/* -SECTION 6- */}
         <div className='page6'>
             <div className='client-info'>
@@ -396,4 +390,66 @@ export default Dashboard
 
 
 
-   
+
+
+
+
+
+
+
+
+
+        // {/* -SECTION 5- */}
+        // <div className='page5'>
+        //     <div className='box'>
+        //         <h>Frequently Asked Questions</h>
+        //         <div className='pg5-container'>
+        //             <details>
+        //                 <summary>How to Renew your License?</summary>
+        //                 <p>
+        //                    1. Go to the Safaricom Portal<br/>
+
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Open the Safaricom services.<br/>
+        //                    2. Sign in<br/>
+
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use your credentials to sign in<br/>
+        //                    3. Check your Software Subscriptions<br/>
+
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Navigate to "My Subscriptions" .<br/>
+        //                    4. Select the Software expired<br/>
+
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Click on the software.<br/>
+        //                    5. Confirm & Pay<br/>
+
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The portal will display the fee.<br/>
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose M-Pesa, Card or Bank transfer as the payment method.<br/>
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If using M-Pesa, enter the Paybill number provided.<br/>
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pay and close.<br/>
+        //                    6. Receive Confirmation<br/>
+
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Once payment is successful, you will get an SMS confirming the payment.<br/>
+        //                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Download or print the receipt.<br/>
+        //                    7. Upload the receipt to our website once done for renewal approve.
+        //             </p>
+        //             </details>
+        //             <details>
+        //                 <summary>How can I upload my software license documents?</summary>
+        //                 <p>You can upload your software license documents by navigating to the 'Document Management' section of your dashboard and selecting the 'Upload' option.</p>
+        //             </details>
+        //             <details>
+        //                 <summary>What types of reminders does LicenseRenew provide?</summary>
+        //                 <p>LicenseRenew provides automated email reminders and in-app notifications for upcoming license renewals, with customizable schedules (e.g., 30, 15, or 7 days before expiry).</p>
+        //             </details>
+        //             <details>
+        //                 <summary>Can I generate reports in LicenseRenew?</summary>
+        //                 <p>Yes, LicenseRenew allows you to generate both PDF and Excel reports to track compliance and license statuses.</p>
+        //             </details>
+        //             <details>
+        //                 <summary>How do I update my contact information?</summary>
+        //                 <p >You can update your contact information by going to your profile page and editing the fields for your email and phone number.</p>
+        //             </details>
+        //         </div>
+                
+        //     </div>
+          
+        // </div>

@@ -23,8 +23,7 @@ class SubscriptionSerializer(WritableNestedModelSerializer, serializers.ModelSer
 
     class Meta:
         model = Subscription
-        fields = ['id', 'subscription_type', 'amount_paid', 'duration', 'issue_date', 'expiry_date', 'document', 'status', 'providers', 'users']
-
+        fields = '__all__'
 
     def update(self, instance, validated_data):
         providers_data = validated_data.pop('providers', None)

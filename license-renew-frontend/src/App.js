@@ -21,6 +21,13 @@ import SignUp from "./pages/SignUp";
 import ForgotPassword from "./components/ForgotPassword.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
 import Renewals from "./pages/Renewals.jsx";
+import Dash from "./pages/Dash.jsx";
+import Layout from "./components/Layout.jsx";
+import DashboardHome from "./pages/DashboardHome.jsx";
+import Subscriptions from "./pages/Subscriptions.jsx";
+import Employee from "./pages/Employees.jsx";
+import Renewing from "./pages/Renewing.jsx";
+import Settings from "./pages/Settings.jsx";
 
 
 function App() {
@@ -56,6 +63,16 @@ function App() {
                 <Route path="/renew/:id" element={<Renew />} />
                 <Route path="/create" element={<Create />} />
                 <Route path="/help" element={<Help />} />
+                <Route path="/dash" element={<Dash />} />
+
+                {/* ---------VERSION 2------------- */}
+                <Route path="/layout" element={<Layout />}>
+                    <Route path="dashboard" element={<DashboardHome />} />
+                    <Route path="subscription" element={<Subscriptions />} />
+                    <Route path="employees" element={<Employee />} />
+                    <Route path="settings" element={<Settings />} />
+                    <Route path="renewing" element={<Renewing />} />
+                </Route>
             </Route>
         </Routes>
     );

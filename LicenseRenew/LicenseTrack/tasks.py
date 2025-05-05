@@ -27,7 +27,10 @@ def send_software_reminder():
 
             
             for license_obj in expiring_licenses:
-                if getattr(license_obj, 'users', None) and getattr(license_obj.users, 'email', None):
+                    user_email = getattr(license_obj.users, 'email', None)
+                    owner_email = getattr(license_obj,  'owner_email', None)
+
+                    recipient_list = [email for email in [user_email, owner_email] if email]
 
                     subject = f"Reminder: Your {license_obj.subscription_type} License Expires Soon"
                     message = f"""
@@ -40,9 +43,9 @@ def send_software_reminder():
                     ABC Bank Group
                     """
 
-                    send_mail(subject, message, "no-reply@example.com", [license_obj.users.email], fail_silently=False)
+                    send_mail(subject, message, "no-reply@example.com", recipient_list, fail_silently=False)
 
-                    print(f"✅ Email sent to {license_obj.users.email}")
+                    print(f"✅ Email sent to: {', '.join(recipient_list)}")
 
         return "Notification Emails Sent!"
     

@@ -86,12 +86,12 @@ const ViewDetails = () => {
                             className="profile-image-img"
                         />
                     
-                    <p className="username">{licenseData.users?.username}</p>
+                    <p className="username">{licenseData.owner_full_name}</p>
                 </div>
                 <div className="license-details">
-                    <p><strong>Name:</strong> {licenseData.users?.first_name} {licenseData.users?.last_name}</p>
-                    <p><strong>Email:</strong> {licenseData.users?.email}</p>
-                    <p><strong>Phone Number:</strong> {licenseData.users?.phone_number}</p>
+                    <p><strong>Name:</strong> {licenseData.owner_full_name}</p>
+                    <p><strong>Email:</strong> {licenseData.owner_email}</p>
+                    <p><strong>Department:</strong> {licenseData.owner_department}</p>
                     <p><strong>Provider:</strong> {licenseData.providers}</p>
                     <p><strong>Amount Paid:</strong> {licenseData.amount_paid}</p>
                     <p><strong>Issue Date:</strong> {licenseData.issue_date}</p>
