@@ -17,7 +17,6 @@ export default function Header() {
                 padding: 1rem;
                 border-bottom: 1px solid #e5e7eb;
                 background-color: white;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
                 }
 
                 .search-input {

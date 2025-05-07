@@ -139,7 +139,7 @@ function DashboardCard({ title, value }) {
 
             .card-value {
             margin-top: 8px;
-            font-size: 24px;
+            font-size: 35px;
             font-weight: bold;
             color: white;
             }

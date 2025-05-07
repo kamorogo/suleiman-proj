@@ -6,8 +6,27 @@ from .views import extract_text, CreateLicense, ForgotPasswordView, ResetPasswor
 from .views import SubscriptionReportAPIView, SubscriptionDataAPIView, SubscriptionTypeReportAPIView, ProvidersListAPIView, SignUpView, SignInView, SignOutView, LoggedUser, UserProfileView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+
+#-----v2-------#
+from .views import (
+    create_admin,
+    create_employee,
+    list_subscriptions,
+    get_subscriptions,
+    delete_subscriptions,
+    SubscriptionsUpdateView,
+    SubscriptionsViewSet,
+    trigger_email,
+    create_subscription_expiry_notification,
+    mark_notification_as_read,
+    get_notifications,
+    get_unread_notifications,
+)
+
+# Router for ViewSet
 router = DefaultRouter()
-# router.register(r"licenses", LicensesViewSet, basename="licenses")
+router.register(r'subscriptions/viewset', SubscriptionsViewSet, basename='subscriptions-viewset')
+
  
 
 
@@ -44,4 +63,31 @@ urlpatterns = [
     path('renew/', renew_subscription, name='renew_subscription'),
     path('forgot_password/', ForgotPasswordView.as_view(), name='forgot-password'),
     path('reset_password/<uidb64>/<token>/', ResetPasswordView.as_view(), name='reset-password'),
+
+
+
+
+    #------v2------#
+    # Admin & Employee
+    path('admin/create/', create_admin, name='create_admin'),
+    path('employee/create/', create_employee, name='create_employee'),
+
+    # Subscriptions
+    path('subscriptions/', list_subscriptions, name='list_subscriptions'),
+    path('subscriptions/<int:id>/', get_subscriptions, name='get_subscription'),
+    path('subscriptions/delete/<int:id>/', delete_subscriptions, name='delete_subscription'),
+    path('subscriptions/update/<int:id>/', SubscriptionsUpdateView.as_view(), name='update_subscription'),
+    path('subscriptions/notify/<int:subscription_id>/', create_subscription_expiry_notification, name='subscription_expiry_notify'),
+
+    # Notifications
+    path('notifications/', get_notifications, name='get_notifications'),
+    path('notifications/unread/', get_unread_notifications, name='get_unread_notifications'),
+    path('notifications/mark-read/<int:notification_id>/', mark_notification_as_read, name='mark_notification_as_read'),
+
+    # Email trigger
+    path('notifications/trigger-email/', trigger_email, name='trigger_email'),
+
+
 ]
+
+urlpatterns += router.urls

@@ -14,6 +14,13 @@ from io import BytesIO
 import io
 
 
+#----V2----#
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save, pre_save
+
+
 class Users(AbstractUser):
     username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
@@ -59,7 +66,7 @@ def generate_initials_avatar(self) -> io.BytesIO:
     image = Image.new("RGB", image_size, color=(255, 255, 255))
     draw = ImageDraw.Draw(image)
 
-    # List of font files to try
+
     font_paths = [
         "path/to/your/font.ttf",
         "path/to/your/font.otf",
@@ -172,7 +179,7 @@ class Subscription(models.Model):
         if self.status == 'decommissioned':
             return
 
-        # Ensure both expiry_date and today are datetime.date objects
+        
         if isinstance(self.expiry_date, str):
             self.expiry_date = datetime.strptime(self.expiry_date, "%Y-%m-%d").date()
 
@@ -248,3 +255,181 @@ class OTP(models.Model):
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(default=timezone.now)
     is_used = models.BooleanField(default=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#------------VERSION2--------------#
+UserRole = [
+    ('superuser', 'Superuser'),
+    ('admin', 'Admin')
+]
+class User(AbstractUser):
+    mobiNumber = models.CharField(max_length=15)
+    userRole = models.CharField(max_length=20, choices=UserRole, default='admin')
+
+    def __str__(self):
+        return self.username
+
+    def generate_avatar(self):
+
+        first_name_initial = self.first_name[0].upper() if self.first_name else ''
+        last_name_initial = self.last_name[0].upper() if self.last_name else ''
+        initials = f"{first_name_initial}{last_name_initial}"
+
+        size = (100, 100)
+        img = Image.new('RGB', size, color=(0, 123, 255))
+        draw = ImageDraw.Draw(img)
+
+        font_paths = [
+            "path/to/your/font.ttf",
+            "path/to/your/font.otf",
+            "path/to/your/backup_font.ttf",
+            "path/to/your/backup_font.otf",
+        ]
+
+       
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    font = ImageFont.truetype(font_path, 50)
+                    break
+                except Exception as e:  
+                    font = None
+        
+        if not font:
+            font = ImageFont.load_default()
+        
+        width, height = draw.textsize(initials, font=font)
+        position = ((size[0] - width) / 2, (size[1] - height) / 2)
+
+    
+        draw.text(position, initials, fill="white", font=font)
+
+
+        image_io = BytesIO()
+        img.save(image_io, 'PNG')
+        image_io.seek(0)
+
+        return image_io
+
+
+    @receiver(user_logged_in)
+    def first_admin(sender, request, user, **kwargs):
+
+        if User.objects.count() < 1:
+            user.is_superuser = True
+            user.is_staff = True
+            user.userRole = 'superuser'
+            user.save()
+        else if not user.is_superuser:
+            user.is_staff = True
+            user.userRole = 'admin'
+            user.save()
+            
+
+
+
+class Employees(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    firstName = models.CharField(max_length=100, null=False, blank=False)
+    lastName = models.CharField(max_length=100, null=False, blank=False)
+    employeesEmail = models.EmailField(unique=True)
+    department = models.CharField(max_length=50)
+    assigned_subscriptions = models.ManyToManyField(Subscriptions, blank=True)
+
+    def __str__(self):
+        return f"Employee {self.firstName} {self.lastName}"
+
+
+
+class Subscriptions(models.Model):
+    sub_type = models.CharField(max_length=100)
+    issuing_authority = models.CharField(max_length=100)
+    issuing_date = models.DateField()
+    expiring_date = models.DateField()
+    associated_documents = models.FileField(upload_to='Subscription/')
+    is_document_uploaded = models.BooleanField(default=False)
+
+
+    def save(self, *args, **kwargs):
+        if self.associated_documents:
+            self.is_document_uploaded = True
+        else: 
+            self.is_document_uploaded = False
+
+
+        super().save(*args, **kwargs)
+
+
+    def status(self, **kwargs):
+        today = date.today()
+
+        if self.expiring_date < today and self.is_document_uploaded:
+            return 'active'
+
+        elif self.expiring_date < today:
+            return 'expired'
+        return 'active'
+
+
+    def __str__(self):
+        return f"Subscription {self.sub_type} - Status: {self.status()}"
+
+
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.recipient.username} - {self.created_at}"
+
+    def mark_as_read(self):
+        self.read = True
+        self.save()
+
+    @classmethod
+    def get_all_notifications(cls):
+        return cls.objects.all()
+    
+    @classmethod
+    def get_unread_notifications(cls):
+        return cls.objects.filter(read=False)
+
+@receiver(post_save, sender=Employees)
+def create_employee_notification(sender, instance, created, **kwargs):
+    if created:
+        message = f"Welcome {instance.firstName} {instance.lastName}, has been added to the system."
+        Notification.objects.create(recipient=instance.user, message=message)
+
+@receiver(pre_save, sender=Subscriptions)
+def create_subscription_expiry_notification(sender, instance, **kwargs  ):
+    if instance.expiring_date and instance.expiring_date <= date.today() + timedelta(days=7):
+        employees_with_subscription = Employees.objects.filter(assigned_subscriptions=instance)
+        for employee in employees_with_subscription:
+            message = f"The {instance.sub_type} subscription for {employee.firstName} {employee.lastName} is expiring soon on {instance.expiring_date}."
+            Notification.objects.create(recipient=employee.user, message=message)

@@ -5,3 +5,5 @@ class LicensetrackConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'LicenseTrack'
 
+    def ready(self):
+        import.LicenseTrack.signals

@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate
 from drf_writable_nested import WritableNestedModelSerializer
 from .models import Subscription, Users, Renewals, Providers, User_Profile
 
+#----v2----#
+from .models import User, Employees, Subscriptions, Notification
+
 
 class ProvidersSerializer(serializers.ModelSerializer):
 
@@ -92,3 +95,45 @@ class SignInSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255, required=True)
     
     password = serializers.CharField(write_only=True, required=True)
+
+
+
+
+#------VERSION2------#
+class UserSerializer(serializers.Serializer):
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
+class EmployeesSerializer(serializers.Serializer):
+    assigned_subscriptions = SubscriptionsSerializer(many=True)
+
+    class Meta:
+        model = Employees
+        fields = '__all__'
+
+    def create(self, validated_data):
+
+        subscriptions_data = validated_data.pop('assigned_subscriptions')
+
+        employee = Employees.objects.create(**validated_data)
+
+        for sub_data in subscriptions_data:
+            subscription = Subscriptions.objects.create(**sub_data)
+            employee.assigned_subscriptions.add(subscription)
+
+        return employee
+
+class SubscriptionsSerializer(serializers.Serializer):
+
+    class Meta:
+        model = Subscriptions
+        fields = '__all__'
+
+class NotificationSerializer(serializers.Serializer):
+
+    class Meta:
+        model = Notification
+        fields = '__all__'

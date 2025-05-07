@@ -20,6 +20,14 @@ app.conf.beat_schedule = {
 }
 
 
+app.conf.beat_schedule = {
+    "send-reminders-daily": {
+        "task": "LicenseTrack.tasks.send_subscription_reminder",
+        "schedule": crontab(hour=10, minute=0),
+    },
+}
+
+
 
 app.autodiscover_tasks()
 

@@ -23,9 +23,13 @@ export default function Sidebar() {
         </div>
 
         <div className="sidebar-footer">
+        <div className="sidebar-link">
+                <Link to="help"><i class="far fa-question-circle" aria-hidden="true"/>&nbsp; Get help</Link>
+            </div>
             <div className="sidebar-link">
                 <Link to="settings"><i class="fa fa-cog fa-fw" aria-hidden="true" />&nbsp; Settings</Link>
             </div>
+           
         </div>
         <style>
             {` 
@@ -37,10 +41,8 @@ export default function Sidebar() {
                 flex-direction: column;
                 justify-content: space-between;
                 height: auto;
-                border-radius: 10px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
                 overflow: hidden;
-                // border-right: 0.1px solid hsl(224.4, 64.3%, 32.9%);
+                border-right: 0.1px solid hsl(224.4, 64.3%, 32.9%);
 
                 }
 
@@ -96,9 +98,9 @@ export default function Sidebar() {
 
                 .sidebar-footer {
                 font-weight: 500;
-                border-top: 1px solid;
+                // border-top: 1px solid;
                 color: hsl(224.4, 64.3%, 32.9%);
-                height: 70px;
+                height: auto;
                 }
             `}
         </style>

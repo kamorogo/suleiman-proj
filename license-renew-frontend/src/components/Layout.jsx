@@ -16,18 +16,13 @@ export default function Layout() {
             {`.admin-layout {
                 display: flex;
                 height: 100vh;
-                padding: 0.5rem 0.5rem 0 0; 
-                box-sizing: border-box;
-                gap: 1rem;
-                background-color: hsl(214.3 94.6% 92.7%); 
+                box-sizing: border-box;            
                 }
 
                 .main-content {
                 display: flex;
                 flex-direction: column;
                 flex: 1;
-                border-radius: 10px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.0);
                 overflow: hidden;
                 }
 
@@ -35,7 +30,7 @@ export default function Layout() {
                 flex: 1;
                 padding: 2rem;
                 overflow: auto;
-                background-color: hsl(214.3 94.6% 92.7%); 
+                 background-color: hsl(220 13% 91%);
                 }
             `}
         </style>

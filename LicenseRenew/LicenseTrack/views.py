@@ -606,10 +606,6 @@ class UserProfileView(APIView):
 
         return Response(serializer.errors, status=400)
 
-
-
-
-# ----RENEW---- #
 @api_view(['POST'])
 @parser_classes([MultiPartParser])
 def renew_subscription(request, id):
@@ -633,3 +629,189 @@ def renew_subscription(request, id):
         return Response({"message": "License renewed."})
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+#-------VERSION2-------#
+@api_view(['POST'])
+def create_admin(request):
+    if request.method == 'POST':
+
+        username = request.POST.get('username')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        mobi_number = request.POST.get('mobiNumber')
+        user_role = request.POST.get('userRole')
+
+        user = User.objects.create(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            mobiNumber=mobi_number,
+            userRole=user_role,
+        )
+
+        serializer = UserSerializer(user)
+        return Response({"message": "User created successfully"})
+
+
+@api_view(['POST'])
+def create_employee(request):
+    if request.method == 'POST':
+
+        first_name_employee = request.POST.get('firstName')
+        last_name_employee = request.POST.get('lastName')
+        employees_email = request.POST.get('employeesEmail')
+        department = request.POST.get('department')
+
+        employee = Employees.objects.create(
+            firstName=first_name_employee,
+            lastName=last_name_employee,
+            employeesEmail=employees_email,
+            department=department,
+        )
+
+
+        message = f"New employee {employee.firstName} {employee.lastName} has been added."
+        admins = User.objects.filter(userRole='admin')
+        for admin in admins:
+            Notification.objects.create(recipient=admin, message=message)
+
+
+        serializer = EmployeesSerializer(employee)
+        return Response({"message": "Employees created successfully"})
+
+
+
+
+
+class SubscriptionsViewSet(viewsets.ModelViewSet):
+    queryset = Subscriptions.objects.all().select_related('user') 
+    serializer_class = SubscriptionsSerializer
+
+@api_view(['GET'])
+def list_subscriptions(request):
+    licenses = Subscriptions.objects.all()
+    serializer = SubscriptionsSerializer(licenses, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_subscriptions(request, id):
+    try:
+        license_obj = Subscriptions.objects.get(id=id)
+        serializer = SubscriptionsSerializer(license_obj)
+        return Response(serializer.data)
+    except Subscriptions.DoesNotExist:
+        return Response({"error": "Software subscription not found"}, status=404)
+
+@api_view(['DELETE'])
+def delete_subscriptions(request, id):
+    try:
+        license_obj = Subscriptions.objects.get(id=id)
+        license_obj.delete()
+        return Response({"message": "subscription deleted successfully"}, status=204)
+    except Subscriptions.DoesNotExist:
+        return Response({"error": "subscription not found"}, status=404)
+
+class SubscriptionsUpdateView(APIView):
+    def put(self, request, id):
+        try:
+            license = Subscriptions.objects.get(id=id)
+        except Subscriptions.DoesNotExist:
+            return Response({'error': 'License not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SubscriptionsSerializer(license, data=request.data, partial=True)
+
+        if serializer.is_valid():
+          
+            serializer.save()
+       
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def trigger_email(request):
+
+    try:
+        send_subscription_reminder.delay()
+        return Response({"message": "Email Notification triggered!"}, status=200)
+
+    except Exception as e:
+
+        return Response({"error": str(e)}, status=500)
+
+
+def create_subscription_expiry_notification(request, subscription_id):
+    subscription = get_object_or_404(Subscriptions, id=subscription_id)
+    
+    
+    if subscription.expiring_date and subscription.expiring_date <= date.today() + timedelta(days=7):
+        admins = User.objects.filter(userRole='admin')
+        employees_with_subscription = Employees.objects.filter(assigned_subscriptions=subscription)
+
+      
+        for employee in employees_with_subscription:
+
+            admin_msg = f"{employee.firstName} {employee.lastName}'s subscription for {subscription.sub_type} is expiring on {subscription.expiring_date}."
+            for admin in admins:
+                Notification.objects.create(recipient=admin, message=admin_msg)
+
+        return JsonResponse({"message": "Notifications created for employee(s) and admin(s)."})
+    else:
+        return JsonResponse({"message": "No notifications needed. Subscription is not expiring soon."})
+
+def mark_notification_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
+    notification.mark_as_read()
+    
+    return JsonResponse({"message": "Notification marked as read"})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notifications(request):
+    user = request.user
+    if user.is_staff:  
+        notifications = Notification.objects.all()
+    else:
+        notifications = Notification.objects.filter(recipient=user)
+    
+    notifications_data = [
+        {
+            'id': notification.id,
+            'message': notification.message,
+            'created_at': notification.created_at,
+            'read': notification.read,
+        }
+        for notification in notifications
+    ]
+    
+    return JsonResponse({"notifications": notifications_data})
+
+
+def get_unread_notifications(request):
+    user = request.user
+    if user.is_staff:  
+        notifications = Notification.objects.filter(read=False)
+    else:
+        notifications = Notification.objects.filter(recipient=user, read=False)
+    
+    notifications_data = [
+        {
+            'id': notification.id,
+            'message': notification.message,
+            'created_at': notification.created_at,
+            'read': notification.read,
+        }
+        for notification in notifications
+    ]
+    
+    return JsonResponse({"unread_notifications": notifications_data})

@@ -1,6 +1,9 @@
 from django.contrib import admin    
 from .models import Users, Providers, Subscription, Renewals
 
+#----V2-----#
+from .models import User, Employees, Subscriptions, Notification
+
 
 
 class UsersAdmin(admin.ModelAdmin):
@@ -36,3 +39,29 @@ admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Renewals, RenewalsAdmin)
 
 
+
+
+#--------VERSION2---------#
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['username', 'first_name', 'last_name', 'email', 'userRole', 'is_staff', 'is_superuser']
+    list_filter = ['userRole', 'is_staff', 'is_superuser']
+    search_fields = ['username', 'email']
+    ordering = ['username']
+
+class EmployeesAdmin(admin.ModelAdmin):
+    list_display = ['firstName', 'lastName', 'employeesEmail', 'department']
+    filter_horizontal = ('assigned_subscriptions',)
+
+class SubscriptionsAdmin(admin.ModelAdmin):
+    list_display = ['sub_type', 'issuing_authority', 'issuing_date', 'expirying_date', 'is_document_uploaded']
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('message', 'read', 'created_at')  
+    list_filter = ('read', 'created_at')  
+    search_fields = ('message',)  
+    ordering = ('-created_at',) 
+
+admin.site.register(User, UserAdmin)
+admin.site.register(Employees, EmployeesAdmin)
+admin.site.register(Subscriptions, SubscriptionsAdmin)
+admin.site.register(Notification, NotificationAdmin)
