@@ -2,138 +2,127 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from drf_writable_nested import WritableNestedModelSerializer
-from .models import Subscription, Users, Renewals, Providers, User_Profile
+# from .models import Subscription, Users, Renewals, Providers, User_Profile
 
 #----v2----#
-from .models import User, Employees, Subscriptions, Notification
+from .models import User, Subscriptions, Notification
 
 
-class ProvidersSerializer(serializers.ModelSerializer):
+# class ProvidersSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Providers
-        fields =  '__all__'
+#     class Meta:
+#         model = Providers
+#         fields =  '__all__'
 
-class UsersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Users
-        fields = ['id', 'username', 'password', 'first_name', 'middle_name', 'last_name', 'phone_number', 'email']
+# class UsersSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Users
+#         fields = ['id', 'username', 'password', 'first_name', 'middle_name', 'last_name', 'phone_number', 'email']
 
-class SubscriptionSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
-    providers = serializers.CharField(source='providers.service_provider')
-    users = UsersSerializer()
+# class SubscriptionSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
+#     providers = serializers.CharField(source='providers.service_provider')
+#     users = UsersSerializer()
     
 
-    class Meta:
-        model = Subscription
-        fields = '__all__'
+#     class Meta:
+#         model = Subscription
+#         fields = '__all__'
 
-    def update(self, instance, validated_data):
-        providers_data = validated_data.pop('providers', None)
-        if providers_data:
-            provider_instance = instance.providers
-            for attr, value in providers_data.items():
-                setattr(provider_instance, attr, value)
-            provider_instance.save()
+#     def update(self, instance, validated_data):
+#         providers_data = validated_data.pop('providers', None)
+#         if providers_data:
+#             provider_instance = instance.providers
+#             for attr, value in providers_data.items():
+#                 setattr(provider_instance, attr, value)
+#             provider_instance.save()
 
-        validated_data.pop('users', None)
+#         validated_data.pop('users', None)
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+#         for attr, value in validated_data.items():
+#             setattr(instance, attr, value)
 
-        instance.save()  
-        return instance
-
-
-class User_ProfileSerializer(serializers.ModelSerializer):
-    user = UsersSerializer(read_only=True)
-
-    class Meta:
-        model = User_Profile
-        fields = '__all__'
-
-    def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', {})
-
-        instance.bio = validated_data.get('bio', instance.bio)
-        instance.address_line1 = validated_data.get('address_line1', instance.address_line1)
-        instance.address_line2 = validated_data.get('address_line2', instance.address_line2)
-        instance.postcode = validated_data.get('postcode', instance.postcode)
-        instance.state = validated_data.get('state', instance.state)
-        instance.country = validated_data.get('country', instance.country)
-        instance.region = validated_data.get('region', instance.region)
+#         instance.save()  
+#         return instance
 
 
-        if 'profile_picture' in validated_data:
-            instance.profile_picture = validated_data['profile_picture']
+# class User_ProfileSerializer(serializers.ModelSerializer):
+#     user = UsersSerializer(read_only=True)
 
-        instance.save()
-        return instance
+#     class Meta:
+#         model = User_Profile
+#         fields = '__all__'
+
+#     def update(self, instance, validated_data):
+#         user_data = validated_data.pop('user', {})
+
+#         instance.bio = validated_data.get('bio', instance.bio)
+#         instance.address_line1 = validated_data.get('address_line1', instance.address_line1)
+#         instance.address_line2 = validated_data.get('address_line2', instance.address_line2)
+#         instance.postcode = validated_data.get('postcode', instance.postcode)
+#         instance.state = validated_data.get('state', instance.state)
+#         instance.country = validated_data.get('country', instance.country)
+#         instance.region = validated_data.get('region', instance.region)
+
+
+#         if 'profile_picture' in validated_data:
+#             instance.profile_picture = validated_data['profile_picture']
+
+#         instance.save()
+#         return instance
 
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+# class SignUpSerializer(serializers.ModelSerializer):
+#     password = serializers.CharField(write_only=True)
 
-    class Meta:
-        model = Users
-        fields = ['username', 'name', 'phone_number', 'email', 'password']
+#     class Meta:
+#         model = Users
+#         fields = ['username', 'name', 'phone_number', 'email', 'password']
 
-    def create(self, validated_data):
-        user = Users(
-            username=validated_data['username'],
-            name=validated_data['name'],
-            phone_number=validated_data.get('phone_number', ''),
-            email=validated_data['email']
-        )
-        user.set_password(validated_data['password'])  
-        user.save()
-        return user
+#     def create(self, validated_data):
+#         user = Users(
+#             username=validated_data['username'],
+#             name=validated_data['name'],
+#             phone_number=validated_data.get('phone_number', ''),
+#             email=validated_data['email']
+#         )
+#         user.set_password(validated_data['password'])  
+#         user.save()
+#         return user
 
-class SignInSerializer(serializers.Serializer):
+# class SignInSerializer(serializers.Serializer):
     
-    username = serializers.CharField(max_length=255, required=True)
+#     username = serializers.CharField(max_length=255, required=True)
     
-    password = serializers.CharField(write_only=True, required=True)
+#     password = serializers.CharField(write_only=True, required=True)
 
 
 
 
 #------VERSION2------#
-class UserSerializer(serializers.Serializer):
 
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'mobiNumber', 'userRole']
 
-
-class EmployeesSerializer(serializers.Serializer):
-    assigned_subscriptions = SubscriptionsSerializer(many=True)
-
-    class Meta:
-        model = Employees
-        fields = '__all__'
-
-    def create(self, validated_data):
-
-        subscriptions_data = validated_data.pop('assigned_subscriptions')
-
-        employee = Employees.objects.create(**validated_data)
-
-        for sub_data in subscriptions_data:
-            subscription = Subscriptions.objects.create(**sub_data)
-            employee.assigned_subscriptions.add(subscription)
-
-        return employee
-
-class SubscriptionsSerializer(serializers.Serializer):
-
+class SubscriptionsSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True) 
+    
     class Meta:
         model = Subscriptions
         fields = '__all__'
+        read_only_fields = ['user', 'is_document_uploaded']
 
-class NotificationSerializer(serializers.Serializer):
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['user'] = request.user
+        return super().create(validated_data)
+
+class NotificationSerializer(serializers.ModelSerializer):
+    recipient = serializers.StringRelatedField()
 
     class Meta:
         model = Notification
-        fields = '__all__'
+        fields = ['id', 'recipient', 'message', 'read', 'created_at']

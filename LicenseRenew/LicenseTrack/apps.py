@@ -6,4 +6,4 @@ class LicensetrackConfig(AppConfig):
     name = 'LicenseTrack'
 
     def ready(self):
-        import.LicenseTrack.signals
+        from . import signals

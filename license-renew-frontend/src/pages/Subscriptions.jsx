@@ -1,9 +1,18 @@
 import { useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/Table.jsx';
 
 export default function Subscriptions() {
   const [subscriptions, setSubscriptions] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({
+  const [formData, setformData] = useState({
     name: '',
     authority: '',
     expiry: '',
@@ -14,15 +23,15 @@ export default function Subscriptions() {
   const [editIndex, setEditIndex] = useState(null);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setformData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const openModal = (sub = null, index = null) => {
     if (sub) {
-      setForm(sub);
+      setformData(sub);
       setEditIndex(index);
     } else {
-      setForm({
+      setformData({
         name: '',
         authority: '',
         expiry: '',
@@ -39,13 +48,13 @@ export default function Subscriptions() {
     e.preventDefault();
     if (editIndex !== null) {
       const updated = [...subscriptions];
-      updated[editIndex] = form;
+      updated[editIndex] = formData;
       setSubscriptions(updated);
     } else {
-      setSubscriptions([...subscriptions, form]);
+      setSubscriptions([...subscriptions, formData]);
     }
     setShowModal(false);
-    setForm({
+    setformData({
       name: '',
       authority: '',
       expiry: '',
@@ -67,7 +76,7 @@ export default function Subscriptions() {
       <h1></h1>
       <div className="add-btn-container">
         <button className="add-btn" onClick={() => openModal()}>
-          + Add Subscription
+          <i class="fa-regular fa-plus"></i>&nbsp;&nbsp; Add
         </button>
       </div>
 
@@ -76,12 +85,12 @@ export default function Subscriptions() {
           <div className="modal">
             <h2>{editIndex !== null ? 'Edit' : 'Add'} Subscription</h2>
             <form onSubmit={handleSubmit}>
-              <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
-              <input name="authority" placeholder="Issuing Authority" value={form.authority} onChange={handleChange} required />
-              <input type="date" name="expiry" value={form.expiry} onChange={handleChange} required />
-              <input name="type" placeholder="Subscription Type" value={form.type} onChange={handleChange} required />
-              <input name="amount" type="number" placeholder="Amount" value={form.amount} onChange={handleChange} required />
-              <input name="reference" placeholder="Reference Number" value={form.reference} onChange={handleChange} required />
+              <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
+              <input name="authority" placeholder="Issuing Authority" value={formData.authority} onChange={handleChange} required />
+              <input type="date" name="expiry" value={formData.expiry} onChange={handleChange} required />
+              <input name="type" placeholder="Subscription Type" value={formData.type} onChange={handleChange} required />
+              <input name="amount" type="number" placeholder="Amount" value={formData.amount} onChange={handleChange} required />
+              <input name="reference" placeholder="Reference Number" value={formData.reference} onChange={handleChange} required />
               <div className="modal-actions">
                 <button type="submit">{editIndex !== null ? 'Update' : 'Save'}</button>
                 <button type="button" onClick={() => setShowModal(false)}>Cancel</button>
@@ -91,24 +100,46 @@ export default function Subscriptions() {
         </div>
       )}
 
-      <div className="subscription-list">
-        {subscriptions.map((sub, index) => (
-          <div key={index} className="subscription-card">
-            <div className="card-details">
-              <h3>{sub.name}</h3>
-              <p><strong>Authority:</strong> {sub.authority}</p>
-              <p><strong>Expiry:</strong> {sub.expiry}</p>
-              <p><strong>Type:</strong> {sub.type}</p>
-              <p><strong>Amount:</strong> ${sub.amount}</p>
-              <p><strong>Ref:</strong> {sub.reference}</p>
-            </div>
-            <div className="card-actions">
-              <button onClick={() => openModal(sub, index)}>Edit</button>
-              <button onClick={() => handleDelete(index)} className="delete-btn">Delete</button>
-            </div>
-          </div>
-        ))}
+      <div className="table-container" style={{ marginTop: '40px' }}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Issuing Authority</TableHead>
+              <TableHead>Expiry Date</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Reference</TableHead>
+              <TableHead>Action</TableHead> 
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {subscriptions.map((sub, index) => (
+              <TableRow key={index}>
+                <TableCell>{sub.name}</TableCell>
+                <TableCell>{sub.type}</TableCell>
+                <TableCell>{sub.authority}</TableCell>
+                <TableCell>{new Date(sub.expiry).toLocaleDateString()}</TableCell>
+                <TableCell>${sub.amount}</TableCell>
+                <TableCell>{sub.reference}</TableCell>
+                <TableCell>
+                  <div className="card-actions">
+                   
+                    <button onClick={() => openModal(sub, index)} className="btn-edit">
+                      Edit
+                    </button>
+                 
+                    <button onClick={() => handleDelete(index)} className="btn-delete">
+                      Delete
+                    </button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
+
 
       <style>{`
         .subscriptions-page {
@@ -131,6 +162,9 @@ export default function Subscriptions() {
           border: none;
           border-radius: 4px;
           cursor: pointer;
+        }
+        .add-btn i {
+        font-size: 12px
         }
 
         .subscription-list {
@@ -224,7 +258,55 @@ export default function Subscriptions() {
         .modal-actions button:last-child {
           background-color: #ccc;
         }
+        
+        .table-container {
+          border: 1px solid #e0e0e0;
+          border-radius: 10px;
+          overflow: hidden;
         }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+          caption-side: bottom;
+          
+        }
+
+        th,
+        td {
+          padding: 12px 15px;
+          border: 0px solid #e0e0e0;
+        }
+
+        th {
+          background-color: #f5f5f5;
+          font-weight: bold;
+          color: #333;
+          text-transform: uppercase;
+          font-size: 14px;
+        }
+
+        td {
+          font-size: 13px;
+          color: #555;
+        }
+
+        tbody tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+          background-color: #f1f1f1;
+        }
+
+        caption {
+          margin-top: 1rem;
+          font-size: 14px;
+          color: #777;
+          text-align: center;
+        }
+
       `}</style>
     </div>
   );

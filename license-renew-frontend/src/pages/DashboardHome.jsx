@@ -1,200 +1,218 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/Table.jsx';
 
 export default function DashboardHome() {
-  const [admins, setAdmins] = useState([]);
+  const [totalSubscriptions, setTotalSubscriptions] = useState(null);
+  const [totalEmployees, setTotalEmployees] = useState(null);
+  const [activeLicenses, setActiveLicenses] = useState(null);
+  const [expiredLicenses, setExpiredLicenses] = useState(null);
+  const [expiringSoon, setExpiringSoon] = useState([]);
+
+
 
   useEffect(() => {
-    fetchAdmins();
+    fetchDashboardStats();
   }, []);
 
-  const fetchAdmins = async () => {
+  const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://127.0.0.1:8000/api/admins/', {
-        headers: { Authorization: `Bearer ${token}` },
+      const headers = { Authorization: `Bearer ${token}` };
+  
+      const [subsRes, activeRes, expiredRes] = await Promise.all([
+        axios.get('http://127.0.0.1:8000/api/subscriptions/', { headers }),
+        axios.get('http://127.0.0.1:8000/api/subscriptions/?status=active', { headers }),
+        axios.get('http://127.0.0.1:8000/api/subscriptions/?status=expired', { headers }),
+      ]);
+  
+      setTotalSubscriptions(subsRes.data.length);
+      setActiveLicenses(activeRes.data.length);
+      setExpiredLicenses(expiredRes.data.length);
+  
+      const today = new Date();
+      const in30Days = new Date();
+      in30Days.setDate(today.getDate() + 30);
+  
+      const expiring = subsRes.data.filter(sub => {
+        const expDate = new Date(sub.expiring_date);
+        return expDate >= today && expDate <= in30Days;
       });
-      setAdmins(res.data);
-    } catch (error) {
-      console.error('Error fetching admins:', error);
-    }
-  };
-
-  const handleAddAdmin = async () => {
-    const name = prompt('Enter new admin name:');
-    if (!name) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(
-        'http://127.0.0.1:8000/api/admins/',
-        { name },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+  
+      setExpiringSoon(expiring);
+  
+      const uniqueOwners = new Set(
+        subsRes.data.map(sub => `${sub.owner_first_name} ${sub.owner_last_name}`)
       );
-      setAdmins(prev => [...prev, res.data]);
+      setTotalEmployees(uniqueOwners.size);
+  
     } catch (error) {
-      console.error('Error adding admin:', error);
+      console.error('Error fetching dashboard stats:', error);
     }
   };
-
-  const handleEditAdmin = async (id) => {
-    const newName = prompt('Enter new name:');
-    if (!newName) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `http://127.0.0.1:8000/api/admins/${id}/`,
-        { name: newName },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      fetchAdmins();
-    } catch (error) {
-      console.error('Error editing admin:', error);
-    }
-  };
-
-  const handleDeleteAdmin = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this admin?')) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://127.0.0.1:8000/api/admins/${id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAdmins(prev => prev.filter(admin => admin.id !== id));
-    } catch (error) {
-      console.error('Error deleting admin:', error);
-    }
-  };
+  
 
   return (
     <div className="dashboard">
-        <div className="dashboard-cards">
-            <DashboardCard title="Total Subscriptions" value="120" />
-            <DashboardCard title="Tracked Employees" value="45" />
-            <DashboardCard title=" Renewing in Next 30 Days" value="12" />
-            <DashboardCard title="Active Licenses" value="10" />
-            <DashboardCard title="Expired Licenses" value="3" />
-            <DashboardCard title="Renewed This Month" value="8" />
-        </div>
+      <div className="dashboard-cards">
+        <DashboardCard
+          title="Total Subscriptions"
+          content={totalSubscriptions}
+          description="Number of subscriptions recorded"
+        />
+        <DashboardCard
+          title="Total Employees"
+          content={totalEmployees}
+          description="Employees with subscriptions assigned"
+        />
+        <DashboardCard
+          title="Active Licenses"
+          content={activeLicenses}
+          description="Currently active subscriptions"
+        />
+        <DashboardCard
+          title="Expired Licenses"
+          content={expiredLicenses}
+          description="Subscriptions past their due date"
+        />
+      </div>
 
-        <div className="admin-section">
-            <div className="admin-header">
-            <h2></h2>
-            <button onClick={handleAddAdmin}>+ Add New Admin</button>
-            </div>
-            <ul className="admin-list">
-            {admins.map(admin => (
-                <li key={admin.id} className="admin-item">
-                <span>{admin.name}</span>
-                <span className="admin-role">{admin.role}</span>
-                <div className="admin-actions">
-                    <button onClick={() => handleEditAdmin(admin.id)} className="edit-btn">Edit</button>
-                    <button onClick={() => handleDeleteAdmin(admin.id)} className="delete-btn">Delete</button>
-                </div>
-                </li>
+
+      <div className="dashboard-table" style={{ marginTop: '40px' }}>
+        <Table>
+          <TableCaption>A list of subscriptions expiring in the next 30 days.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[180px]">Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Issuing Authority</TableHead>
+              <TableHead>Expiry Date</TableHead>
+              <TableHead className="text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {expiringSoon.map((sub, index) => (
+              <TableRow key={index}>
+                <TableCell>{sub.name}</TableCell>
+                <TableCell>{sub.sub_type}</TableCell>
+                <TableCell>{sub.issuing_authority}</TableCell>
+                <TableCell>{new Date(sub.expiry_date).toLocaleDateString()}</TableCell>
+                <TableCell className="text-right">{sub.status}</TableCell>
+              </TableRow>
             ))}
-            </ul>
-        </div>
+          </TableBody>
+        </Table>
+      </div>
+
+
+      <style>{`
+        .dashboard {
+          display: flex;
+          flex-direction: column;
+          gap: 40px;
+          padding: 24px;
+        }
+
+        .dashboard-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 16px;
+        }
+
+        .card {
+          background-color: hsl(224.4, 64.3%, 32.9%);
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+          color: white;
+        }
+
+        .card-title {
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        .card-content {
+          margin-top: 8px;
+          font-size: 30px;
+          font-weight: bold;
+        }
+
+        .card-description {
+          margin-top: 12px;
+          font-size: 13px;
+          color: #cfd8dc;
+        }
+
+        .table-container {
+          width: 100%;
+          border: 1px solid #333;
+          border-radius: 10px;
+          overflow: hidden;
+          overflow-x: auto;
+          margin-top: 2rem;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+          caption-side: bottom;
+        }
+
+        th,
+        td {
+          padding: 12px 15px;
+          border: 0px solid #e0e0e0;
+        }
+
+        th {
+          background-color: #f5f5f5;
+          font-weight: bold;
+          color: #333;
+          text-transform: uppercase;
+          font-size: 14px;
+        }
+
+        td {
+          font-size: 13px;
+          color: #555;
+        }
+
+        tbody tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+          background-color: #f1f1f1;
+        }
+
+        caption {
+          margin-top: 1rem;
+          font-size: 14px;
+          color: #777;
+          text-align: center;
+        }
+
+      `}</style>
     </div>
   );
 }
 
-function DashboardCard({ title, value }) {
+function DashboardCard({ title, content, description }) {
   return (
     <div className="card">
       <h3 className="card-title">{title}</h3>
-      <p className="card-value">{value}</p>
-
-      <style>
-        {`.dashboard {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            padding: 24px;
-            }
-
-            .dashboard-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 16px;
-            }
-
-            .card {
-            background-color: hsl(224.4, 64.3%, 32.9%);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            }
-
-            .card-title {
-            font-size: 14px;
-            color: white;
-            }
-
-            .card-value {
-            margin-top: 8px;
-            font-size: 35px;
-            font-weight: bold;
-            color: white;
-            }
-
-            .admin-section {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            }
-
-            .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            }
-
-            .admin-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-            }
-
-            .admin-header button {
-            padding: 8px 16px;
-            background-color: hsl(224.4, 64.3%, 32.9%);;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            }
-
-            .admin-header button:hover {
-            background-color: #004c99;
-            }
-
-            .admin-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            }
-
-            .admin-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-            }
-
-            .admin-role {
-            font-size: 14px;
-            color: #777;
-            }
-            `}
-      </style>
+      <p className="card-content">{content}</p>
+      <p className="card-description">{description}</p>
     </div>
   );
 }

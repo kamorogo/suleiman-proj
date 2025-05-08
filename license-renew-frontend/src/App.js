@@ -67,6 +67,7 @@ function App() {
 
                 {/* ---------VERSION 2------------- */}
                 <Route path="/layout" element={<Layout />}>
+                    <Route index element={<DashboardHome />} />
                     <Route path="dashboard" element={<DashboardHome />} />
                     <Route path="subscription" element={<Subscriptions />} />
                     <Route path="employees" element={<Employee />} />

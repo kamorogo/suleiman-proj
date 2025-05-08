@@ -1,5 +1,44 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 
 export default function Header() {
+    const [licenseData, setLicenseData] = useState(null);
+    const token = localStorage.getItem('token');
+
+
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!token) {
+        console.error('No token found!');
+        return;
+      }
+
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/admin/create/', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authoriz.ation': `Bearer ${token}`,
+          },
+        });
+        setLicenseData(response.data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchUserData();
+  }, [token]);
+  
+
+  const getInitialsAvatar = (firstName, lastName) => {
+    const fullName = `${firstName || ''} ${lastName || ''}`.trim();
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random&color=fff&size=128`;
+  };
+
+
   return (
     <div className="header">
         <input type="text" placeholder="Search..." className="search-input" />
