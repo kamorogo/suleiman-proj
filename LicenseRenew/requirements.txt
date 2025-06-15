@@ -33,5 +33,5 @@ python-crontab==3.2.0
 python-Levenshtein==0.27.1
 redis==5.2.1
 reportlab==3.6.8
-requests==2.25.1
+requests==2.32.4
 
