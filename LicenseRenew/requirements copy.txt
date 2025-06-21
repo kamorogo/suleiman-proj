@@ -85,7 +85,7 @@ pexpect==4.8.0
 pillow==11.2.1
 platformdirs==3.5.0
 prompt_toolkit==3.0.51
-protobuf==3.12.4
+protobuf==4.25.8
 psycopg2-binary==2.9.10
 ptyprocess==0.7.0
 pycairo==1.20.1
@@ -129,7 +129,7 @@ ubuntu-drivers-common==0.0.0
 ubuntu-pro-client==8001
 ufw==0.36.1
 unattended-upgrades==0.1
-urllib3==1.26.5
+urllib3==2.5.0
 usb-creator==0.3.7
 vine==5.1.0
 virtualenv==20.23.0
