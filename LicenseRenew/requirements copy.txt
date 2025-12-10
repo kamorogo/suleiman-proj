@@ -129,7 +129,7 @@ ubuntu-drivers-common==0.0.0
 ubuntu-pro-client==8001
 ufw==0.36.1
 unattended-upgrades==0.1
-urllib3==1.26.5
+urllib3==2.6.0
 usb-creator==0.3.7
 vine==5.1.0
 virtualenv==20.23.0
