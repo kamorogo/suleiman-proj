@@ -35,3 +35,4 @@ redis==5.2.1
 reportlab==3.6.8
 requests==2.25.1
 
+urllib3>=2.6.0 # not directly required, pinned by Snyk to avoid a vulnerability
