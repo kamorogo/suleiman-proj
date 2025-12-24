@@ -45,7 +45,7 @@ djangorestframework_simplejwt==5.5.0
 drf-writable-nested==0.7.2
 duplicity==0.8.21
 fasteners==0.14.1
-filelock==3.12.0
+filelock==3.20.1
 fonttools==4.57.0
 future==0.18.2
 fuzzywuzzy==0.18.0
